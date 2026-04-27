@@ -1,0 +1,8 @@
+{
+  "name": "reviewer",
+  "description": "Code review, security review, regression checks",
+  "model": "solar-pro3",
+  "tools": ["read_file", "bash", "search"],
+  "outputContract": "review.md in .oms/logs/reviews/",
+  "failureHandling": "If diff is too large, review top-level structure and flag for manual review."
+}

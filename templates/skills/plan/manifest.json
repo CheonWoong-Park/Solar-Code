@@ -1,0 +1,7 @@
+{
+  "name": "plan",
+  "trigger": "$plan",
+  "description": "Run full planning workflow for a goal",
+  "usage": "$plan <goal>",
+  "example": "$plan 결제 모듈을 리팩토링하고 테스트를 보강해줘"
+}

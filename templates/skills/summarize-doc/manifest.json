@@ -1,0 +1,7 @@
+{
+  "name": "summarize-doc",
+  "trigger": "$summarize-doc",
+  "description": "Parse and summarize a document in Korean or English",
+  "usage": "$summarize-doc <file>",
+  "example": "$summarize-doc ./계약서.pdf"
+}

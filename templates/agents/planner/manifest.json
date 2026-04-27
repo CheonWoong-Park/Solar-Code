@@ -1,0 +1,8 @@
+{
+  "name": "planner",
+  "description": "Turns vague requests into clear, actionable plans",
+  "model": "solar-pro3",
+  "tools": ["read_file", "list_files", "search"],
+  "outputContract": "plan.md written to .oms/plans/<timestamp>-plan.md",
+  "failureHandling": "If goal is too vague, ask one clarifying question before proceeding"
+}

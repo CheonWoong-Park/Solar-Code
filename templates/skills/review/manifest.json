@@ -1,0 +1,7 @@
+{
+  "name": "review",
+  "trigger": "$review",
+  "description": "Code review the current git diff with Solar",
+  "usage": "$review",
+  "example": "$review"
+}

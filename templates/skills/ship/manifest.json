@@ -1,0 +1,7 @@
+{
+  "name": "ship",
+  "trigger": "$ship",
+  "description": "Pre-ship checklist: review, tests, docs, changelog",
+  "usage": "$ship",
+  "example": "$ship"
+}

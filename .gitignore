@@ -1,0 +1,30 @@
+node_modules/
+dist/
+*.js.map
+*.d.ts.map
+.env
+.env.*
+!.env.example
+*.log
+npm-debug.log*
+
+# Solar Code state directories (project-local)
+.oms/
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Editor
+.idea/
+.vscode/settings.json
+*.swp
+*.swo
+
+# Build artifacts
+*.tgz
+*.tar.gz
+
+# Test coverage
+coverage/
+.nyc_output/

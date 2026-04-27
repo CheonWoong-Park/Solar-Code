@@ -1,0 +1,7 @@
+{
+  "name": "tdd",
+  "trigger": "$tdd",
+  "description": "Generate test-first implementation plan",
+  "usage": "$tdd <feature>",
+  "example": "$tdd 사용자 인증 시스템"
+}

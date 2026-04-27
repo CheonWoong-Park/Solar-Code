@@ -1,0 +1,8 @@
+{
+  "name": "researcher",
+  "description": "Web/repo/doc research — summarizes sources and findings",
+  "model": "solar-pro3",
+  "tools": ["web_search", "web_fetch", "read_file", "search"],
+  "outputContract": "research.md with sources, findings, and recommendations",
+  "failureHandling": "If a source is unavailable, note it and continue with available sources."
+}

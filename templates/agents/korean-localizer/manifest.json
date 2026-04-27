@@ -1,0 +1,8 @@
+{
+  "name": "korean-localizer",
+  "description": "Korean-first UX, tone, docs, government/business document style",
+  "model": "solar-pro3",
+  "tools": ["read_file", "write_file", "search"],
+  "outputContract": "Localized Korean content with proper style and register",
+  "failureHandling": "If unsure about register (formal/informal), default to formal (존댓말)."
+}

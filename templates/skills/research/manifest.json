@@ -1,0 +1,7 @@
+{
+  "name": "research",
+  "trigger": "$research",
+  "description": "Deep web/repo research on a topic, synthesized into findings",
+  "usage": "$research <topic>",
+  "example": "$research Upstage Solar API rate limits and pricing"
+}

@@ -1,0 +1,26 @@
+{
+  "_comment": "Oh My Solar hooks — SECURITY: only enable hooks from sources you trust. Review all commands before enabling.",
+  "enabled": false,
+  "hooks": [
+    {
+      "event": "SessionStart",
+      "command": "echo \"[oms] Session started at $(date)\" >> ~/.oms-audit.log",
+      "description": "Append session start to audit log"
+    },
+    {
+      "event": "BeforeCommand",
+      "command": "echo \"[oms] Command: $OMS_COMMAND\" >> ~/.oms-audit.log",
+      "description": "Log commands before execution"
+    },
+    {
+      "event": "AfterToolUse",
+      "command": "echo \"[oms] Tool used: $OMS_TOOL\" >> ~/.oms-audit.log",
+      "description": "Log tool usage"
+    },
+    {
+      "event": "Stop",
+      "command": "echo \"[oms] Session ended\" >> ~/.oms-audit.log",
+      "description": "Log session end"
+    }
+  ]
+}

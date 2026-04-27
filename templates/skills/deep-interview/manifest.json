@@ -1,0 +1,7 @@
+{
+  "name": "deep-interview",
+  "trigger": "$deep-interview",
+  "description": "Conduct a deep clarification interview before starting complex work",
+  "usage": "$deep-interview <topic>",
+  "example": "$deep-interview 새 기능 설계"
+}

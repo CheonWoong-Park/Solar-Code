@@ -1,0 +1,7 @@
+{
+  "name": "team",
+  "trigger": "$team",
+  "description": "Spawn a multi-agent team to tackle a large goal",
+  "usage": "$team <n> <goal>",
+  "example": "$team 3 결제 모듈을 리팩토링하고 테스트를 보강해줘"
+}

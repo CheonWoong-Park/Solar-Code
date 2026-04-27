@@ -1,0 +1,7 @@
+{
+  "name": "parse",
+  "trigger": "$parse",
+  "description": "Parse document with Upstage Document Parse",
+  "usage": "$parse <file> [--ask 'question']",
+  "example": "$parse ./report.pdf --ask '핵심 리스크를 요약해줘'"
+}

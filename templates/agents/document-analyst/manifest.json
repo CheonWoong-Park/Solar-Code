@@ -1,0 +1,8 @@
+{
+  "name": "document-analyst",
+  "description": "Upstage Document Parse + structured info extraction + Korean document summarization",
+  "model": "solar-pro3",
+  "tools": ["read_file", "oms_parse_document"],
+  "outputContract": "structured JSON + summary markdown in .oms/parsed/",
+  "failureHandling": "If file format unsupported, list supported formats and ask user to convert."
+}

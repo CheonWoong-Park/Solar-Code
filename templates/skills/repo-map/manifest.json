@@ -1,0 +1,7 @@
+{
+  "name": "repo-map",
+  "trigger": "$repo-map",
+  "description": "Generate a comprehensive map of the repository structure and architecture",
+  "usage": "$repo-map",
+  "example": "$repo-map"
+}

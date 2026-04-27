@@ -1,0 +1,8 @@
+{
+  "name": "executor",
+  "description": "Implementation agent — writes code, runs tests, makes changes",
+  "model": "solar-pro3",
+  "tools": ["read_file", "write_file", "edit_file", "bash", "search"],
+  "outputContract": "Working code committed to the worktree",
+  "failureHandling": "If stuck, write a TODO comment and continue. Report blockers in executor-notes.md."
+}

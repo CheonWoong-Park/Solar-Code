@@ -1,0 +1,7 @@
+{
+  "name": "contract-review",
+  "trigger": "$contract-review",
+  "description": "Review contract documents for risks and key terms (Korean/English)",
+  "usage": "$contract-review <file>",
+  "example": "$contract-review ./NDA.pdf"
+}

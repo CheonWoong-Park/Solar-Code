@@ -1,0 +1,7 @@
+{
+  "name": "doctor",
+  "trigger": "$doctor",
+  "description": "Run oms doctor environment check",
+  "usage": "$doctor",
+  "example": "$doctor"
+}
