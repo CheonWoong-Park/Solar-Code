@@ -12,6 +12,7 @@ import { cmdHud } from './hud.js';
 import { cmdResume } from './resume.js';
 import { cmdAgents } from './agents.js';
 import { cmdSkills } from './skills.js';
+import { cmdParity } from './parity.js';
 import { cmdVersion } from './version.js';
 import { cmdHelp } from './help.js';
 
@@ -32,6 +33,7 @@ const COMMANDS: Record<string, CommandFn> = {
   resume: cmdResume,
   agents: cmdAgents,
   skills: cmdSkills,
+  parity: cmdParity,
   version: cmdVersion,
   help: cmdHelp,
 };

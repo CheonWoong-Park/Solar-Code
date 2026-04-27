@@ -7,10 +7,17 @@ USAGE
   solar --model solar-pro3     Launch with a model override
   solar --yes                  Auto-approve write/execute tool calls
   solar --readonly             Read-only mode
+  solar --profile trusted      Trust file writes while still guarding dangerous commands
 
 SLASH COMMANDS
   /help                        Show agent-shell commands
   /status                      Show session and connection status
+  /session                     Show session file and context stats
+  /sessions                    List recent sessions
+  /cost                        Show estimated usage accounting
+  /diff                        Show git working tree summary
+  /compact                     Compact old session history
+  /export [md|json]            Export current session
   /model [model]               Show model usage
   /init                        Create SOLAR.md project guidance
   /history                     Show recent activity
@@ -26,6 +33,7 @@ LEGACY SHELL COMMANDS
   solar parse <file>           Parse document with Upstage
   solar team <n> <goal>        Spawn parallel workers
   solar resume                 Resume last session
+  solar parity                 Run deterministic mock-engine smoke check
 
 COMPATIBILITY
   oms still works as an alias while the project moves to Solar Code.

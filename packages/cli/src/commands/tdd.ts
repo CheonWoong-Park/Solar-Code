@@ -12,7 +12,7 @@ import {
   writeAtomic,
   appendLog,
 } from '@solar-code/core';
-import { permissionModeFromFlags, runAgent } from '@solar-code/engine';
+import { permissionModeFromFlags, permissionProfileFromFlags, runAgent } from '@solar-code/engine';
 
 const TDD_SYSTEM = `You are a TDD expert. Given a feature goal, write:
 1. A test plan with specific test cases (unit, integration, edge cases)
@@ -101,6 +101,7 @@ export async function cmdTdd(
       omsDir,
       maxTurns,
       permissionMode: permissionModeFromFlags(flags),
+      permissionProfile: permissionProfileFromFlags(flags, config.agent.permissionProfile),
       command: 'tdd',
     });
     return result.exitCode;

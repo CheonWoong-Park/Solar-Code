@@ -1,7 +1,7 @@
 import * as readline from 'readline';
 import { existsSync, writeFileSync } from 'fs';
 import { join } from 'path';
-import { getOmsDir, loadConfig } from '@solar-code/core';
+import { fireHooks, getOmsDir, loadConfig, loadHooks, type HooksConfig } from '@solar-code/core';
 import {
   executeToolCall,
   getToolDefinitions,
@@ -9,6 +9,7 @@ import {
   type AgentToolCall,
   type ToolResult,
 } from '../tools/index.js';
+import { validateBashCommand } from '../tools/bash-policy.js';
 import type { AgentMessage, AgentSessionState } from './messages.js';
 import {
   createAssistantTextRenderer,
@@ -31,10 +32,15 @@ import {
   startWorkingIndicator,
   type PromptStatusOptions,
 } from './output.js';
-import { confirmToolExecution, type PermissionMode } from './permissions.js';
-import { appendSessionMessage, openAgentSession, updateAgentSessionTurns } from './session.js';
+import { compactSessionMessages } from './compaction.js';
+import { exportSession, formatCostSummary, formatSessionSummary, getGitDiffSummary, listSessionSummaries } from './diagnostics.js';
+import { confirmToolExecution, type PermissionMode, type PermissionProfile } from './permissions.js';
+import { directResponseForPrompt, suppressReasonForToolCall } from './policy.js';
+import { sanitizePostToolAssistantResponse, shouldConstrainPostToolResponse } from './response-policy.js';
+import { appendSessionMessage, openAgentSession, rewriteSessionMessages, updateAgentSessionTurns } from './session.js';
 import { streamChatCompletion } from './stream-parser.js';
 import { buildSystemPrompt } from './system-prompt.js';
+import { recordModelUsage, recordToolUsage } from './usage.js';
 
 export interface RunAgentOptions {
   prompt?: string;
@@ -43,6 +49,7 @@ export interface RunAgentOptions {
   model?: string;
   maxTurns?: number;
   permissionMode?: PermissionMode;
+  permissionProfile?: PermissionProfile;
   resume?: boolean;
   command?: string;
   slashCommandHandler?: SlashCommandHandler;
@@ -64,6 +71,12 @@ const ENGINE_SLASH_COMMANDS = new Set([
   'quit',
   'help',
   'status',
+  'session',
+  'sessions',
+  'cost',
+  'diff',
+  'compact',
+  'export',
   'model',
   'agents',
   'history',
@@ -126,12 +139,49 @@ function describeToolPlan(toolCalls: AgentToolCall[]): string {
   return toolCalls.map(formatToolSummary).join(' → ');
 }
 
+function lastUserContent(session: AgentSessionState): string {
+  for (let i = session.messages.length - 1; i >= 0; i--) {
+    const message = session.messages[i];
+    if (message.role === 'user') return message.content;
+  }
+  return '';
+}
+
+function printAssistantText(content: string): void {
+  printAssistantPrefix();
+  const renderer = createAssistantTextRenderer();
+  renderer.write(content);
+  renderer.flush();
+  finishAssistantLine();
+}
+
+function printBlock(label: string, body: string): void {
+  printProgressStep(label);
+  process.stdout.write(`${body.split('\n').map((line) => `  ${line}`).join('\n')}\n`);
+}
+
+function compactSession(
+  session: AgentSessionState,
+  omsDir: string,
+  force = false
+): ReturnType<typeof compactSessionMessages> {
+  const result = compactSessionMessages(session.messages, { force });
+  if (result.compacted) {
+    session.messages = result.messages;
+    rewriteSessionMessages(omsDir, session.id, session.messages);
+  }
+  return result;
+}
+
 async function runTool(
   call: AgentToolCall,
   session: AgentSessionState,
   omsDir: string,
   cwd: string,
-  permissionMode: PermissionMode
+  permissionMode: PermissionMode,
+  permissionProfile: PermissionProfile,
+  hooksConfig: HooksConfig,
+  userContent: string
 ): Promise<'ok' | 'blocked'> {
   if ('__parse_error' in call.arguments) {
     const content = String(call.arguments['__parse_error']);
@@ -148,14 +198,39 @@ async function runTool(
     return 'ok';
   }
 
+  const suppressed = suppressReasonForToolCall(call, userContent);
+  if (suppressed) {
+    const content = `BLOCKED: ${suppressed}`;
+    addMessage(session, omsDir, { role: 'tool', tool_call_id: call.id, name: tool.name, content });
+    printProgressStep('Skipped', suppressed);
+    return 'blocked';
+  }
+
+  if (tool.name === 'bash') {
+    const command = typeof call.arguments['command'] === 'string' ? call.arguments['command'] : '';
+    const denial = validateBashCommand(command);
+    if (denial) {
+      const content = `BLOCKED: ${denial.reason}`;
+      addMessage(session, omsDir, { role: 'tool', tool_call_id: call.id, name: tool.name, content });
+      printProgressStep('Blocked', denial.reason);
+      return 'blocked';
+    }
+  }
+
   let description: string;
   try {
     description = tool.describe(call.arguments);
   } catch {
     description = call.rawArguments;
   }
+  await fireHooks(hooksConfig, 'BeforeToolUse', {
+    session: session.id,
+    cwd,
+    tool: tool.name,
+    description,
+  });
   printToolStart(tool.name, description);
-  const decision = await confirmToolExecution(permissionMode, tool, description);
+  const decision = await confirmToolExecution(permissionMode, tool, description, permissionProfile);
   if (!decision.allowed) {
     const content = `BLOCKED: ${decision.reason ?? 'permission denied'}`;
     addMessage(session, omsDir, { role: 'tool', tool_call_id: call.id, name: tool.name, content });
@@ -165,22 +240,38 @@ async function runTool(
 
   const result = await executeToolCall(call, { cwd });
   printToolResult(result, tool.name);
+  const content = formatToolContent(result);
   addMessage(session, omsDir, {
     role: 'tool',
     tool_call_id: call.id,
     name: tool.name,
-    content: formatToolContent(result),
+    content,
+  });
+  recordToolUsage(omsDir, session.id, tool.name, content);
+  await fireHooks(hooksConfig, 'AfterToolUse', {
+    session: session.id,
+    cwd,
+    tool: tool.name,
+    ok: result.ok ? 'true' : 'false',
   });
   return 'ok';
 }
 
 async function runAgentLoop(
   session: AgentSessionState,
-  options: Required<Pick<RunAgentOptions, 'cwd' | 'omsDir' | 'model' | 'permissionMode'>> & { maxTurns: number; interactive: boolean }
+  options: Required<Pick<RunAgentOptions, 'cwd' | 'omsDir' | 'model' | 'permissionMode' | 'permissionProfile'>> & {
+    maxTurns: number;
+    interactive: boolean;
+    hooksConfig: HooksConfig;
+  }
 ): Promise<void> {
   while (session.turns < options.maxTurns) {
     session.turns += 1;
     updateAgentSessionTurns(options.omsDir, session);
+    const compacted = compactSession(session, options.omsDir);
+    if (options.interactive && compacted.compacted) {
+      printProgressStep('Compacted', `${compacted.archivedMessages} messages · ${compacted.before.approxTokens} → ${compacted.after.approxTokens} tokens`);
+    }
 
     const stopWorking = options.interactive ? startWorkingIndicator('Thinking') : () => undefined;
     const controller = new AbortController();
@@ -188,13 +279,16 @@ async function runAgentLoop(
     const assistantRenderer = createAssistantTextRenderer();
     let printedAssistantPrefix = false;
     let result: Awaited<ReturnType<typeof streamChatCompletion>>;
+    const constrainAssistantOutput = shouldConstrainPostToolResponse(session.messages);
     try {
+      const messagesBeforeRequest = [...session.messages];
       result = await streamChatCompletion({
         model: options.model,
         messages: session.messages,
         tools: getToolDefinitions(),
         signal: controller.signal,
         onContent: (text) => {
+          if (constrainAssistantOutput) return;
           if (!printedAssistantPrefix) {
             stopWorking();
             printAssistantPrefix();
@@ -202,6 +296,11 @@ async function runAgentLoop(
           }
           assistantRenderer.write(text);
         },
+      });
+      recordModelUsage(options.omsDir, session.id, {
+        messages: messagesBeforeRequest,
+        content: result.content,
+        toolCalls: result.toolCalls,
       });
     } catch (err) {
       stopWorking();
@@ -224,9 +323,16 @@ async function runAgentLoop(
     }
     else stopWorking();
 
+    const assistantContent = constrainAssistantOutput
+      ? sanitizePostToolAssistantResponse(result.content, session.messages)
+      : result.content;
+    if (constrainAssistantOutput && assistantContent.trim()) {
+      printAssistantText(assistantContent);
+    }
+
     const assistantMessage: AgentMessage = result.assistantToolCalls.length > 0
-      ? { role: 'assistant', content: result.content || null, tool_calls: result.assistantToolCalls }
-      : { role: 'assistant', content: result.content };
+      ? { role: 'assistant', content: assistantContent || null, tool_calls: result.assistantToolCalls }
+      : { role: 'assistant', content: assistantContent };
     addMessage(session, options.omsDir, assistantMessage);
 
     if (result.toolCalls.length === 0 || result.finishReason !== 'tool_calls') {
@@ -235,8 +341,18 @@ async function runAgentLoop(
     if (options.interactive) {
       printProgressStep('Plan', describeToolPlan(result.toolCalls));
     }
+    const userContent = lastUserContent(session);
     for (const call of result.toolCalls) {
-      const toolStatus = await runTool(call, session, options.omsDir, options.cwd, options.permissionMode);
+      const toolStatus = await runTool(
+        call,
+        session,
+        options.omsDir,
+        options.cwd,
+        options.permissionMode,
+        options.permissionProfile,
+        options.hooksConfig,
+        userContent
+      );
       if (toolStatus === 'blocked') return;
     }
     if (options.interactive) {
@@ -273,7 +389,9 @@ async function handleSlashCommand(
   input: string,
   session: AgentSessionState,
   options: Required<Pick<RunAgentOptions, 'cwd' | 'omsDir' | 'model' | 'permissionMode'>> & {
+    permissionProfile: PermissionProfile;
     maxTurns: number;
+    hooksConfig: HooksConfig;
     slashCommandHandler?: SlashCommandHandler;
   }
 ): Promise<'handled' | 'exit' | 'agent'> {
@@ -305,6 +423,35 @@ async function handleSlashCommand(
         messageCount: session.messages.length,
       });
       return 'handled';
+    case '/session':
+      printBlock('Session', formatSessionSummary(session, options.omsDir));
+      return 'handled';
+    case '/sessions':
+      printBlock('Sessions', listSessionSummaries(options.omsDir));
+      return 'handled';
+    case '/cost':
+      printBlock('Cost', formatCostSummary(session, options.omsDir));
+      return 'handled';
+    case '/diff': {
+      const diff = getGitDiffSummary(options.cwd);
+      printBlock(diff.ok ? 'Diff' : 'Diff unavailable', diff.output);
+      return 'handled';
+    }
+    case '/compact': {
+      const result = compactSession(session, options.omsDir, true);
+      if (result.compacted) {
+        printBlock('Compacted', `${result.archivedMessages} messages archived\n${result.before.approxTokens} → ${result.after.approxTokens} approx tokens`);
+      } else {
+        printNotice('nothing to compact yet');
+      }
+      return 'handled';
+    }
+    case '/export': {
+      const format = arg === 'json' ? 'json' : 'md';
+      const file = exportSession(session, options.omsDir, format);
+      printNotice(`exported session: ${file}`);
+      return 'handled';
+    }
     case '/model':
       if (arg) {
         printNotice(`model switching is per process for now. Restart with: solar --model ${arg}`);
@@ -358,10 +505,28 @@ async function handleSlashCommand(
     return 'handled';
   }
   try {
+    await fireHooks(options.hooksConfig, 'BeforeCommand', {
+      session: session.id,
+      cwd: options.cwd,
+      command: parsed.command,
+      args: parsed.args.join(' '),
+    });
     await options.slashCommandHandler(parsed.command, parsed.args, parsed.flags);
+    await fireHooks(options.hooksConfig, 'AfterCommand', {
+      session: session.id,
+      cwd: options.cwd,
+      command: parsed.command,
+      ok: 'true',
+    });
   } catch (err) {
     const message = err instanceof Error ? err.message : String(err);
     process.stderr.write(`\nCommand failed: ${message}\n`);
+    await fireHooks(options.hooksConfig, 'AfterCommand', {
+      session: session.id,
+      cwd: options.cwd,
+      command: parsed.command,
+      ok: 'false',
+    });
   }
   return 'handled';
 }
@@ -369,10 +534,16 @@ async function handleSlashCommand(
 async function runInteractive(
   session: AgentSessionState,
   options: Required<Pick<RunAgentOptions, 'cwd' | 'omsDir' | 'model' | 'permissionMode'>> & {
+    permissionProfile: PermissionProfile;
     maxTurns: number;
+    hooksConfig: HooksConfig;
     slashCommandHandler?: SlashCommandHandler;
   }
 ): Promise<number> {
+  if (!process.stdin.isTTY) {
+    return runBatchInput(session, options);
+  }
+
   const inputHistory: string[] = [];
   const promptStatus = {
     model: options.model,
@@ -398,6 +569,18 @@ async function runInteractive(
     }
 
     addMessage(session, options.omsDir, { role: 'user', content: userInput });
+    await fireHooks(options.hooksConfig, 'UserPromptSubmit', {
+      session: session.id,
+      cwd: options.cwd,
+      prompt: userInput,
+    });
+    const direct = directResponseForPrompt(userInput, { cwd: options.cwd });
+    if (direct) {
+      printAssistantText(direct.content);
+      addMessage(session, options.omsDir, { role: 'assistant', content: direct.content });
+      continue;
+    }
+
     try {
       await runAgentLoop(session, { ...options, interactive: true });
     } catch (err) {
@@ -407,13 +590,67 @@ async function runInteractive(
   }
 }
 
+async function runBatchInput(
+  session: AgentSessionState,
+  options: Required<Pick<RunAgentOptions, 'cwd' | 'omsDir' | 'model' | 'permissionMode'>> & {
+    permissionProfile: PermissionProfile;
+    maxTurns: number;
+    hooksConfig: HooksConfig;
+    slashCommandHandler?: SlashCommandHandler;
+  }
+): Promise<number> {
+  const chunks: Buffer[] = [];
+  for await (const chunk of process.stdin) {
+    chunks.push(Buffer.isBuffer(chunk) ? chunk : Buffer.from(String(chunk)));
+  }
+
+  const lines = Buffer.concat(chunks)
+    .toString('utf-8')
+    .split(/\r?\n/)
+    .map((line) => line.trim())
+    .filter(Boolean);
+
+  for (const userInput of lines) {
+    process.stdout.write(`${printUserPrompt()}${userInput}\n`);
+    if (isSlashCommand(userInput)) {
+      const slash = await handleSlashCommand(userInput, session, options);
+      if (slash === 'exit') return 0;
+      continue;
+    }
+
+    addMessage(session, options.omsDir, { role: 'user', content: userInput });
+    await fireHooks(options.hooksConfig, 'UserPromptSubmit', {
+      session: session.id,
+      cwd: options.cwd,
+      prompt: userInput,
+    });
+    const direct = directResponseForPrompt(userInput, { cwd: options.cwd });
+    if (direct) {
+      printAssistantText(direct.content);
+      addMessage(session, options.omsDir, { role: 'assistant', content: direct.content });
+      continue;
+    }
+
+    try {
+      await runAgentLoop(session, { ...options, interactive: false });
+    } catch (err) {
+      const message = err instanceof Error ? err.message : String(err);
+      process.stderr.write(`\nError: ${message}\n`);
+      return 1;
+    }
+  }
+  return 0;
+}
+
 export async function runAgent(options: RunAgentOptions = {}): Promise<AgentRunResult> {
   const cwd = options.cwd ?? process.cwd();
   const config = loadConfig(cwd);
   const model = options.model ?? config.model ?? 'solar-pro3';
   const omsDir = options.omsDir ?? getOmsDir(cwd);
   const permissionMode = options.permissionMode ?? 'ask';
+  const permissionProfile = options.permissionProfile ?? config.agent.permissionProfile ?? 'standard';
   const maxTurns = parseMaxTurns(options.maxTurns);
+  const hooksConfig = loadHooks(omsDir);
   const session = openAgentSession({
     omsDir,
     model,
@@ -422,6 +659,12 @@ export async function runAgent(options: RunAgentOptions = {}): Promise<AgentRunR
   });
 
   ensureSystemMessage(session, omsDir, cwd);
+  await fireHooks(hooksConfig, 'SessionStart', {
+    session: session.id,
+    cwd,
+    model,
+    command: options.command ?? 'code',
+  });
   printSessionBanner({
     model,
     sessionId: session.id,
@@ -430,12 +673,35 @@ export async function runAgent(options: RunAgentOptions = {}): Promise<AgentRunR
     permissionMode,
     maxTurns,
     resumed: options.resume === true,
-    interactive: !options.prompt?.trim(),
+    interactive: !options.prompt?.trim() && process.stdin.isTTY && process.stdout.isTTY,
   });
 
   if (options.prompt?.trim()) {
-    addMessage(session, omsDir, { role: 'user', content: options.prompt.trim() });
-    await runAgentLoop(session, { cwd, omsDir, model, permissionMode, maxTurns, interactive: false });
+    const prompt = options.prompt.trim();
+    addMessage(session, omsDir, { role: 'user', content: prompt });
+    await fireHooks(hooksConfig, 'UserPromptSubmit', {
+      session: session.id,
+      cwd,
+      prompt,
+    });
+    const direct = directResponseForPrompt(prompt, { cwd });
+    if (direct) {
+      printAssistantText(direct.content);
+      addMessage(session, omsDir, { role: 'assistant', content: direct.content });
+      await fireHooks(hooksConfig, 'Stop', { session: session.id, cwd, exitCode: '0' });
+      return { exitCode: 0, sessionId: session.id };
+    }
+    await runAgentLoop(session, {
+      cwd,
+      omsDir,
+      model,
+      permissionMode,
+      permissionProfile,
+      maxTurns,
+      interactive: false,
+      hooksConfig,
+    });
+    await fireHooks(hooksConfig, 'Stop', { session: session.id, cwd, exitCode: '0' });
     return { exitCode: 0, sessionId: session.id };
   }
 
@@ -444,9 +710,12 @@ export async function runAgent(options: RunAgentOptions = {}): Promise<AgentRunR
     omsDir,
     model,
     permissionMode,
+    permissionProfile,
     maxTurns,
+    hooksConfig,
     slashCommandHandler: options.slashCommandHandler,
   });
+  await fireHooks(hooksConfig, 'Stop', { session: session.id, cwd, exitCode: String(exitCode) });
   printNotice(`session saved: ${session.id}`);
   return { exitCode, sessionId: session.id };
 }

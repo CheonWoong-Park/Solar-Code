@@ -2,6 +2,7 @@ import { getUpstageApiKey, getUpstageBaseUrl, resolveModel } from '@solar-code/c
 import type { ToolDefinition } from '@solar-code/core';
 import type { AgentToolCall } from '../tools/index.js';
 import type { AgentMessage, ChatToolCall } from './messages.js';
+import { mockStreamChatCompletion } from './mock-provider.js';
 
 interface ChatCompletionChunk {
   choices?: Array<{
@@ -122,6 +123,10 @@ function getHeaders(apiKey: string): Record<string, string> {
 }
 
 export async function streamChatCompletion(options: StreamChatOptions): Promise<StreamChatResult> {
+  if (process.env['SOLAR_MOCK'] === '1') {
+    return mockStreamChatCompletion(options.messages, options.onContent);
+  }
+
   const apiKey = getUpstageApiKey();
   if (!apiKey) {
     throw new Error('UPSTAGE_API_KEY is not set. export UPSTAGE_API_KEY="up_..."');

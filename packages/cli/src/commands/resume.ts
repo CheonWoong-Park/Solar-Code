@@ -8,7 +8,7 @@ import {
   getUpstageApiKey,
   getLastSession,
 } from '@solar-code/core';
-import { permissionModeFromFlags, runAgent } from '@solar-code/engine';
+import { permissionModeFromFlags, permissionProfileFromFlags, runAgent } from '@solar-code/engine';
 import { runSlashCommand } from '../slash.js';
 
 export async function cmdResume(
@@ -26,7 +26,8 @@ export async function cmdResume(
   }
 
   const apiKey = getUpstageApiKey();
-  if (!apiKey) {
+  const mockMode = process.env['SOLAR_MOCK'] === '1';
+  if (!apiKey && !mockMode) {
     process.stderr.write('UPSTAGE_API_KEY not set.\n');
     return 1;
   }
@@ -41,6 +42,7 @@ export async function cmdResume(
     omsDir,
     maxTurns,
     permissionMode: permissionModeFromFlags(flags),
+    permissionProfile: permissionProfileFromFlags(flags, config.agent.permissionProfile),
     resume: true,
     command: session.command,
     slashCommandHandler: runSlashCommand,

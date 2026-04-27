@@ -2,18 +2,10 @@
 
 # Solar Code
 
-**Solar-native terminal coding agent for local repositories.**
+**A Solar-native terminal coding agent for local repositories**
 
 Solar Code is an interactive coding agent shell powered by Upstage Solar.  
-It can inspect your repository, plan code changes, edit files, run commands, and keep project-local session history.
-
-<br />
-
-```bash
-npm install -g solar-code
-export UPSTAGE_API_KEY="up_..."
-solar
-```
+It can inspect your repository, plan code changes, edit files, run commands, and preserve project-local session history.
 
 <br />
 
@@ -33,11 +25,11 @@ solar
 **Solar Code** is a local terminal coding agent designed for real repository work.
 
 It is closer to **Claude Code** or **Codex CLI** than a collection of standalone commands.  
-You launch it inside a project, talk to Solar through an interactive shell, and approve file or command actions as needed.
+You launch Solar Code inside your project, talk to Solar through an interactive shell, and approve file edits or command executions when needed.
 
 ```text
 solar
-› ask Solar Code for code work
+› Ask Solar Code to work on your code
 • Thinking
 • Plan write_file src/example.ts
 • Modified
@@ -46,27 +38,41 @@ solar
 solar › done
 ```
 
-The legacy `oms` command remains available as a compatibility alias, but the primary product is now:
-
-```text
-Solar Code
-```
-
 ---
 
 ## Why Solar Code?
 
-Solar Code is built around a simple idea:
+Solar Code began as a project inspired by Anthropic's Claude Code and OpenAI's Codex CLI.
 
-> A coding agent should feel like a native terminal tool, not a detached chatbot.
+We are becoming increasingly comfortable writing code, solving problems, and building products together with AI.  
+But at the same time, one question kept coming to mind.
 
-It provides:
+> What happens if a small number of foundation model vendors come to dominate the AI development environment?
+
+Just as the control of water determines survival in *Mad Max*,  
+there may come a time when controlling access to LLMs means controlling developer productivity, technical accessibility, and software creation itself.
+
+If access to foundation models is restricted by certain countries, organizations, or vendors,  
+we may not simply lose access to a single API. We may immediately face a widening gap in development speed, automation capability, security analysis, and product execution.
+
+In the end, we need our own foundation model ecosystem.
+
+That is when **Solar** caught my attention.
+
+Solar is a foundation model developed by [Upstage](https://www.upstage.ai/), a South Korean AI company.
+However, Solar did not yet have a terminal-native coding agent experience like Claude Code or Codex CLI — one that could read local repositories, edit files, execute commands, and work directly inside a developer's environment.
+
+So I built one.
+
+**Solar Code** is an attempt to turn Solar from a simple chat model into a coding agent that works with developers inside the terminal.
+
+Solar Code provides:
 
 - Interactive agent shell
 - Local repository awareness
 - Solar function-calling engine
 - Workspace-scoped file tools
-- Safe approval flow for writes and commands
+- Safe approval flow for file writes and command execution
 - Persistent project state under `.oms/`
 - Compatibility with existing `oms` workflows
 
@@ -84,7 +90,7 @@ Set your Upstage API key:
 export UPSTAGE_API_KEY="up_..."
 ```
 
-Optional custom base URL:
+Optionally, configure a custom base URL:
 
 ```bash
 export UPSTAGE_BASE_URL="https://..."
@@ -132,7 +138,7 @@ solar › Created test/tetris.html.
 
 ## Terminal UX
 
-Solar Code separates user input, status, work logs, and final responses.
+Solar Code visually separates user input, status, work logs, and final responses.
 
 ```text
 › Implement login validation
@@ -151,18 +157,18 @@ solar › Updated login validation.
 
 | Surface | Behavior |
 | --- | --- |
-| User input | Dark input card with `›` prompt |
-| Status line | Shows active model, permission mode, and current workspace |
+| User input | Dark input card with a `›` prompt |
+| Status line | Shows the active model, permission mode, and current workspace |
 | Work log | `Thinking`, `Plan`, `Explored`, `Modified`, `Ran`, `Next` |
-| Approval | Single-key approval: <kbd>y</kbd> approve, <kbd>n</kbd> / <kbd>Enter</kbd> / <kbd>Esc</kbd> deny |
-| Interrupt | Press <kbd>Esc</kbd> or <kbd>Ctrl+C</kbd> while thinking |
-| Markdown emphasis | `**important**` renders as purple terminal emphasis |
+| Approval | Single-key approval: <kbd>y</kbd> to approve, <kbd>n</kbd> / <kbd>Enter</kbd> / <kbd>Esc</kbd> to deny |
+| Interrupt | Press <kbd>Esc</kbd> or <kbd>Ctrl+C</kbd> while the agent is thinking |
+| Markdown emphasis | `**important**` is rendered as purple emphasis in the terminal |
 
 ---
 
 ## Shell Commands
 
-Inside the interactive shell, use slash commands:
+Inside the interactive shell, you can use slash commands.
 
 | Command | Description |
 | --- | --- |
@@ -174,8 +180,8 @@ Inside the interactive shell, use slash commands:
 | `/clear` | Redraw the dashboard |
 | `/doctor` | Run environment checks |
 | `/setup` | Initialize `.oms/` project state |
-| `/agents` | List or show agent profiles |
-| `/oms <command>` | Run legacy `oms` commands inside the shell |
+| `/agents` | List or inspect agent profiles |
+| `/oms <command>` | Run legacy `oms` commands inside the agent shell |
 
 Examples:
 
@@ -184,8 +190,8 @@ Examples:
 /setup
 /init
 /history
-/oms parse ./report.pdf --ask "핵심 내용을 요약해줘"
-/oms team 3 "인증 모듈 리팩토링"
+/oms parse ./report.pdf --ask "Summarize the key points"
+/oms team 3 "Refactor the authentication module"
 ```
 
 ---
@@ -196,8 +202,8 @@ Examples:
 | --- | --- |
 | `solar` | Launch the interactive agent shell |
 | `solar "prompt"` | Run a one-shot prompt in the current workspace |
-| `solar --yes` | Auto-approve write and execute tool calls |
-| `solar --readonly` | Block write and execute tool calls |
+| `solar --yes` | Auto-approve file write and command execution tool calls |
+| `solar --readonly` | Block file write and command execution tool calls |
 | `solar --model solar-pro3` | Override the default model |
 | `solar resume` | Resume the last session |
 
@@ -212,13 +218,13 @@ solar --model solar-pro3
 solar resume
 ```
 
-Legacy commands still work:
+Legacy commands continue to work:
 
 ```bash
 solar setup
 solar doctor
-solar parse ./report.pdf --ask "요약해줘"
-solar team 3 "결제 모듈을 리팩토링해줘"
+solar parse ./report.pdf --ask "Summarize this"
+solar team 3 "Refactor the payment module"
 
 oms doctor
 ```
@@ -235,7 +241,7 @@ For example, if Solar Code starts from:
 /mnt/d/DEV/OhMySolar
 ```
 
-Then these paths are allowed:
+The following paths are allowed:
 
 ```text
 test/tetris.html
@@ -248,20 +254,20 @@ But this path is blocked:
 /mnt/d/DEV/test/tetris.html
 ```
 
-To work in another project, start Solar Code there:
+To work in another project, start Solar Code from that directory:
 
 ```bash
 cd /mnt/d/DEV/test
 solar
 ```
 
-This keeps file reads, writes, edits, and shell commands constrained to the active workspace.
+This keeps file reads, writes, edits, and shell command execution constrained to the active workspace.
 
 ---
 
 ## Native Engine
 
-Solar Code uses a TypeScript Solar function-calling engine with local coding tools.
+Solar Code uses a TypeScript-based Solar function-calling engine with local coding tools.
 
 ```mermaid
 flowchart LR
@@ -280,10 +286,10 @@ Available tools:
 | `bash` | Run shell commands with timeout and output limits |
 | `read_file` | Read workspace files with line numbers |
 | `write_file` | Create or overwrite files atomically |
-| `edit_file` | Replace exact strings safely |
+| `edit_file` | Safely edit files using exact string replacement |
 | `glob` | Find files by pattern |
 | `grep` | Search file contents |
-| `list_files` | List directories |
+| `list_files` | List directory contents |
 
 ---
 
@@ -293,9 +299,9 @@ Solar Code supports three permission modes.
 
 | Mode | Behavior |
 | --- | --- |
-| `ask` | Ask before write or execute tools |
-| `auto` | Auto-approve tools with `--yes` |
-| `readonly` | Block write and execute tools |
+| `ask` | Ask before file writes or command execution |
+| `auto` | Auto-approve tool calls when using `--yes` |
+| `readonly` | Block file writes and command execution |
 
 Default mode:
 
@@ -334,7 +340,7 @@ Solar Code currently stores project state under `.oms/` for compatibility.
   skills/
 ```
 
-Session history is saved as JSONL:
+Session history is saved in JSONL format:
 
 ```text
 .oms/sessions/
@@ -376,7 +382,7 @@ Run lint:
 npm run lint
 ```
 
-Link locally:
+Link the CLI globally for local development:
 
 ```bash
 npm run link:global
@@ -440,20 +446,20 @@ solar-pro3
 
 Solar Code is the primary product.
 
-The old `oms` command remains supported as a compatibility alias:
+The existing `oms` command remains supported as a compatibility alias.
 
 ```bash
 oms doctor
-oms parse ./report.pdf --ask "요약해줘"
-oms team 3 "인증 모듈 리팩토링"
+oms parse ./report.pdf --ask "Summarize this"
+oms team 3 "Refactor the authentication module"
 ```
 
 Inside the Solar Code shell:
 
 ```text
 /oms doctor
-/oms parse ./report.pdf --ask "핵심 내용을 요약해줘"
-/oms team 3 "인증 모듈 리팩토링"
+/oms parse ./report.pdf --ask "Summarize the key points"
+/oms team 3 "Refactor the authentication module"
 ```
 
 ---
@@ -467,6 +473,6 @@ MIT
 <div align="center">
 
 **Solar Code**  
-Terminal-native coding agent powered by Solar.
+A terminal-native coding agent powered by Solar.
 
 </div>

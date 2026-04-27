@@ -488,6 +488,12 @@ export function printSlashHelp(): void {
   process.stdout.write(`${paint('/agents', PURPLE)}   Show agent profile hint\n`);
   process.stdout.write(`${paint('/model', PURPLE)}    Show active model and model switch usage\n`);
   process.stdout.write(`${paint('/status', PURPLE)}   Show session status\n`);
+  process.stdout.write(`${paint('/session', PURPLE)}  Show session file and context stats\n`);
+  process.stdout.write(`${paint('/sessions', PURPLE)} List recent sessions\n`);
+  process.stdout.write(`${paint('/cost', PURPLE)}     Show approximate context usage\n`);
+  process.stdout.write(`${paint('/diff', PURPLE)}     Show git working tree summary\n`);
+  process.stdout.write(`${paint('/compact', PURPLE)}  Compact older session history\n`);
+  process.stdout.write(`${paint('/export', PURPLE)}   Export current session as Markdown or JSON\n`);
   process.stdout.write(`${paint('/history', PURPLE)}  Show recent session activity\n`);
   process.stdout.write(`${paint('/clear', PURPLE)}    Redraw the dashboard\n`);
   process.stdout.write(`${paint('/oms <cmd>', PURPLE)} Run legacy commands inside Solar Code, e.g. /oms doctor\n`);

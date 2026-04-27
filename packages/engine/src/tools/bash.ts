@@ -1,4 +1,5 @@
 import { spawn } from 'child_process';
+import { validateBashCommand } from './bash-policy.js';
 import type { ToolExecutor, ToolExecutionContext, ToolResult } from './types.js';
 
 const DEFAULT_TIMEOUT_MS = 10_000;
@@ -25,7 +26,7 @@ export const bashTool: ToolExecutor = {
     type: 'function',
     function: {
       name: 'bash',
-      description: 'Run a shell command in the current workspace. Use for builds, tests, and repository inspection.',
+      description: 'Run a shell command in the current workspace. Use mainly for builds, tests, checks, git, or commands explicitly requested by the user. Do not use for casual identity questions or simple file operations.',
       parameters: {
         type: 'object',
         additionalProperties: false,
@@ -49,6 +50,9 @@ export const bashTool: ToolExecutor = {
   },
   async execute(args: Record<string, unknown>, context: ToolExecutionContext): Promise<ToolResult> {
     const command = stringArg(args, 'command');
+    const denial = validateBashCommand(command);
+    if (denial) return { ok: false, output: '', error: `Blocked by command policy: ${denial.reason}` };
+
     const timeoutMs = numberArg(args, 'timeout_ms', DEFAULT_TIMEOUT_MS, 60_000);
     const maxOutputChars = numberArg(args, 'max_output_chars', DEFAULT_MAX_OUTPUT_CHARS, 50_000);
 

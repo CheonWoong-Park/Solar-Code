@@ -32,6 +32,13 @@ export function appendSessionMessage(omsDir: string, sessionId: string, message:
   writeFileSync(file, `${JSON.stringify(message)}\n`, { flag: 'a', encoding: 'utf-8' });
 }
 
+export function rewriteSessionMessages(omsDir: string, sessionId: string, messages: AgentMessage[]): void {
+  const file = sessionJsonlPath(omsDir, sessionId);
+  mkdirSync(join(omsDir, 'sessions'), { recursive: true });
+  const content = messages.map((message) => JSON.stringify(message)).join('\n');
+  writeAtomic(file, content ? `${content}\n` : '');
+}
+
 export function loadSessionMessages(omsDir: string, sessionId: string): AgentMessage[] {
   const file = sessionJsonlPath(omsDir, sessionId);
   if (!existsSync(file)) return [];

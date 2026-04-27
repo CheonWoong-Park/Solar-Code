@@ -7,6 +7,9 @@ export interface OmsConfig {
   model: string;
   language: 'ko' | 'en' | 'auto';
   backend: 'native' | 'claw-code' | 'none';
+  agent: {
+    permissionProfile: 'standard' | 'trusted' | 'locked';
+  };
   documentParse: {
     enabled: boolean;
     outputFormat: 'markdown' | 'html' | 'text';
@@ -27,6 +30,9 @@ export const DEFAULT_CONFIG: OmsConfig = {
   model: 'solar-pro3',
   language: 'ko',
   backend: 'native',
+  agent: {
+    permissionProfile: 'standard',
+  },
   documentParse: {
     enabled: true,
     outputFormat: 'markdown',

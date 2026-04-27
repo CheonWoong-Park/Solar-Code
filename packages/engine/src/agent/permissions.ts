@@ -3,6 +3,7 @@ import { formatApprovalPrompt } from './output.js';
 import type { ToolExecutor } from '../tools/index.js';
 
 export type PermissionMode = 'ask' | 'auto' | 'readonly';
+export type PermissionProfile = 'standard' | 'trusted' | 'locked';
 
 export interface PermissionDecision {
   allowed: boolean;
@@ -54,12 +55,19 @@ function askApproval(question: string): Promise<boolean> {
 export async function confirmToolExecution(
   mode: PermissionMode,
   tool: ToolExecutor,
-  description: string
+  description: string,
+  profile: PermissionProfile = 'standard'
 ): Promise<PermissionDecision> {
+  if (profile === 'locked' && tool.permission !== 'read') {
+    return { allowed: false, reason: `locked profile blocks ${tool.name}` };
+  }
   if (mode === 'readonly' && tool.permission !== 'read') {
     return { allowed: false, reason: `readonly mode blocks ${tool.name}` };
   }
   if (tool.permission === 'read' || mode === 'auto') {
+    return { allowed: true };
+  }
+  if (profile === 'trusted' && tool.permission === 'write') {
     return { allowed: true };
   }
   if (!process.stdin.isTTY || !process.stdout.isTTY) {
@@ -78,4 +86,14 @@ export function permissionModeFromFlags(flags: Record<string, string | boolean>)
   if (flags['yes'] === true || flags['y'] === true) return 'auto';
   if (flags['readonly'] === true) return 'readonly';
   return 'ask';
+}
+
+export function permissionProfileFromFlags(
+  flags: Record<string, string | boolean>,
+  fallback: PermissionProfile = 'standard'
+): PermissionProfile {
+  const explicit = flags['profile'] ?? flags['permission-profile'];
+  if (explicit === 'standard' || explicit === 'trusted' || explicit === 'locked') return explicit;
+  if (flags['readonly'] === true) return 'locked';
+  return fallback;
 }

@@ -3,7 +3,7 @@
  */
 
 import { loadConfig, getOmsDir, getUpstageApiKey } from '@solar-code/core';
-import { permissionModeFromFlags, runAgent } from '@solar-code/engine';
+import { permissionModeFromFlags, permissionProfileFromFlags, runAgent } from '@solar-code/engine';
 import { runSlashCommand } from '../slash.js';
 
 export async function cmdCode(
@@ -11,7 +11,8 @@ export async function cmdCode(
   flags: Record<string, string | boolean>
 ): Promise<number> {
   const apiKey = getUpstageApiKey();
-  if (!apiKey) {
+  const mockMode = process.env['SOLAR_MOCK'] === '1';
+  if (!apiKey && !mockMode) {
     process.stderr.write('Error: UPSTAGE_API_KEY is not set.\nexport UPSTAGE_API_KEY="up_..."\n');
     return 1;
   }
@@ -30,6 +31,7 @@ export async function cmdCode(
     omsDir,
     maxTurns,
     permissionMode: permissionModeFromFlags(flags),
+    permissionProfile: permissionProfileFromFlags(flags, config.agent.permissionProfile),
     resume: flags['resume'] === true,
     command: 'code',
     slashCommandHandler: runSlashCommand,

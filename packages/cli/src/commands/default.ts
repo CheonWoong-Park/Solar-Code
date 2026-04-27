@@ -4,7 +4,7 @@
  */
 
 import { loadConfig, getOmsDir, getUpstageApiKey } from '@solar-code/core';
-import { permissionModeFromFlags, runAgent } from '@solar-code/engine';
+import { permissionModeFromFlags, permissionProfileFromFlags, runAgent } from '@solar-code/engine';
 import { runSlashCommand } from '../slash.js';
 
 export async function cmdDefault(
@@ -12,7 +12,8 @@ export async function cmdDefault(
   flags: Record<string, string | boolean>
 ): Promise<number> {
   const apiKey = getUpstageApiKey();
-  if (!apiKey) {
+  const mockMode = process.env['SOLAR_MOCK'] === '1';
+  if (!apiKey && !mockMode) {
     process.stdout.write(`
 Solar Code — Solar-native terminal coding agent
 
@@ -42,6 +43,7 @@ To get started:
     omsDir: getOmsDir(cwd),
     maxTurns,
     permissionMode: permissionModeFromFlags(flags),
+    permissionProfile: permissionProfileFromFlags(flags, config.agent.permissionProfile),
     resume: flags['resume'] === true,
     command: 'default',
     slashCommandHandler: runSlashCommand,
