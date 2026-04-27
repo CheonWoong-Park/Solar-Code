@@ -7,6 +7,7 @@ const MAX_CONTEXT_CHARS = 12_000;
 const IGNORED_ROOT_ENTRIES = new Set([
   '.git',
   '.oms',
+  '.solar-code',
   '.solar',
   'node_modules',
   'dist',

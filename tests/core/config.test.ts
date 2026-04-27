@@ -8,6 +8,7 @@ import { randomBytes } from 'crypto';
 let loadConfig: typeof import('../../packages/core/src/config.js').loadConfig;
 let saveConfig: typeof import('../../packages/core/src/config.js').saveConfig;
 let resolveModel: typeof import('../../packages/core/src/config.js').resolveModel;
+let getOmsDir: typeof import('../../packages/core/src/config.js').getOmsDir;
 let DEFAULT_CONFIG: typeof import('../../packages/core/src/config.js').DEFAULT_CONFIG;
 
 async function importConfig() {
@@ -15,6 +16,7 @@ async function importConfig() {
   loadConfig = mod.loadConfig;
   saveConfig = mod.saveConfig;
   resolveModel = mod.resolveModel;
+  getOmsDir = mod.getOmsDir;
   DEFAULT_CONFIG = mod.DEFAULT_CONFIG;
 }
 
@@ -31,12 +33,16 @@ describe('config', () => {
     rmSync(tmpDir, { recursive: true, force: true });
   });
 
-  it('returns default config when no .oms/ exists', () => {
+  it('returns default config when no .solar-code/ exists', () => {
     const config = loadConfig(tmpDir);
     expect(config.provider).toBe('upstage');
     expect(config.model).toBe('solar-pro3');
     expect(config.language).toBe('ko');
     expect(config.backend).toBe('native');
+  });
+
+  it('uses .solar-code for project-local state', () => {
+    expect(getOmsDir(tmpDir)).toBe(join(tmpDir, '.solar-code'));
   });
 
   it('saves and loads config', () => {

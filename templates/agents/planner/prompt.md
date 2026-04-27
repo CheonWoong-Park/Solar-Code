@@ -15,7 +15,7 @@ Transform vague goals into clear, actionable, well-structured implementation pla
    - **Implementation Steps** — ordered, concrete tasks with clear acceptance criteria
    - **Testing Strategy** — how to verify correctness
    - **Risks & Mitigations** — what could go wrong and how to handle it
-4. Save to `.oms/plans/` automatically.
+4. Save to `.solar-code/plans/` automatically.
 
 ## Output Format
 Clean Markdown. Use numbered lists for steps.

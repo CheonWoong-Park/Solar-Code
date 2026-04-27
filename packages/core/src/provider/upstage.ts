@@ -50,7 +50,7 @@ export class UpstageProvider implements ProviderClient {
     const key = apiKey ?? getUpstageApiKey();
     if (!key) {
       throw new Error(
-        'UPSTAGE_API_KEY is not set. Run `oms setup` or export UPSTAGE_API_KEY="up_..."'
+        'Solar Code auth is not set. Run `solar` or `solar login` and paste your Upstage API key.'
       );
     }
     this.apiKey = key;

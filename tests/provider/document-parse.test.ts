@@ -15,13 +15,22 @@ describe('isSupportedFile', () => {
 
 describe('parseDocument (mocked API)', () => {
   let tmpDir: string;
+  let tmpHome: string;
   let testFile: string;
   let originalFetch: typeof global.fetch;
+  let originalSolarCodeHome: string | undefined;
+  let originalApiKey: string | undefined;
 
   beforeEach(() => {
     originalFetch = global.fetch;
+    originalSolarCodeHome = process.env['SOLAR_CODE_HOME'];
+    originalApiKey = process.env['UPSTAGE_API_KEY'];
     tmpDir = join(tmpdir(), `oms-parse-test-${randomBytes(4).toString('hex')}`);
+    tmpHome = join(tmpdir(), `solar-code-parse-test-${randomBytes(4).toString('hex')}`);
     mkdirSync(tmpDir, { recursive: true });
+    mkdirSync(tmpHome, { recursive: true });
+    process.env['SOLAR_CODE_HOME'] = tmpHome;
+    delete process.env['UPSTAGE_API_KEY'];
     testFile = join(tmpDir, 'test.pdf');
     writeFileSync(testFile, Buffer.from('%PDF-1.4 fake'));
   });
@@ -29,13 +38,17 @@ describe('parseDocument (mocked API)', () => {
   afterEach(() => {
     global.fetch = originalFetch;
     rmSync(tmpDir, { recursive: true, force: true });
+    rmSync(tmpHome, { recursive: true, force: true });
+    if (originalSolarCodeHome === undefined) delete process.env['SOLAR_CODE_HOME'];
+    else process.env['SOLAR_CODE_HOME'] = originalSolarCodeHome;
+    if (originalApiKey === undefined) delete process.env['UPSTAGE_API_KEY'];
+    else process.env['UPSTAGE_API_KEY'] = originalApiKey;
   });
 
   it('throws without API key', async () => {
-    delete process.env['UPSTAGE_API_KEY'];
     await expect(
       parseDocument({ filePath: testFile, apiKey: undefined })
-    ).rejects.toThrow('UPSTAGE_API_KEY');
+    ).rejects.toThrow('Solar Code auth');
   });
 
   it('throws for missing file', async () => {
@@ -72,13 +85,13 @@ describe('parseDocument (mocked API)', () => {
     expect(result.content).toContain('Hello World');
   });
 
-  it('saves output to .oms/parsed/', async () => {
+  it('saves output to .solar-code/parsed/', async () => {
     global.fetch = vi.fn().mockResolvedValue({
       ok: true,
       json: async () => ({ content: { markdown: '# Test\nContent here' } }),
     }) as unknown as typeof fetch;
 
-    const omsDir = join(tmpDir, '.oms');
+    const omsDir = join(tmpDir, '.solar-code');
     mkdirSync(join(omsDir, 'parsed'), { recursive: true });
 
     const result = await parseDocument({ filePath: testFile, apiKey: 'up_key', omsDir });

@@ -1,32 +1,19 @@
 /**
  * solar (no subcommand) — launch Solar Code agent session.
- * If no UPSTAGE_API_KEY, show setup instructions.
+ * If no UPSTAGE_API_KEY, prompt for one.
  */
 
-import { loadConfig, getOmsDir, getUpstageApiKey } from '@solar-code/core';
+import { loadConfig, getOmsDir } from '@solar-code/core';
 import { permissionModeFromFlags, permissionProfileFromFlags, runAgent } from '@solar-code/engine';
 import { runSlashCommand } from '../slash.js';
+import { ensureUpstageApiKey } from '../upstage-key.js';
 
 export async function cmdDefault(
   args: string[],
   flags: Record<string, string | boolean>
 ): Promise<number> {
-  const apiKey = getUpstageApiKey();
   const mockMode = process.env['SOLAR_MOCK'] === '1';
-  if (!apiKey && !mockMode) {
-    process.stdout.write(`
-Solar Code — Solar-native terminal coding agent
-
-UPSTAGE_API_KEY is not set.
-
-To get started:
-  1. Get your API key at https://console.upstage.ai
-  2. export UPSTAGE_API_KEY="up_..."
-  3. solar
-  4. inside Solar Code: /setup
-  5. inside Solar Code: /doctor
-
-`);
+  if (!mockMode && !(await ensureUpstageApiKey())) {
     return 1;
   }
 

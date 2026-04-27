@@ -33,7 +33,7 @@ export async function cmdTeam(
   // Main: oms team <n> [goal]
   const apiKey = getUpstageApiKey();
   if (!apiKey) {
-    process.stderr.write('Error: UPSTAGE_API_KEY is not set.\n');
+    process.stderr.write('Error: Solar Code auth is not set. Run `solar login`.\n');
     return 1;
   }
 
@@ -133,7 +133,7 @@ async function teamResume(
   }
   process.stdout.write(`\n[oms team resume] Resuming session ${session.id}\n`);
   if (!apiKey) {
-    process.stderr.write('Error: UPSTAGE_API_KEY is not set.\n');
+    process.stderr.write('Error: Solar Code auth is not set. Run `solar login`.\n');
     return 1;
   }
   await runTeamSession(session, omsDir, model, apiKey);

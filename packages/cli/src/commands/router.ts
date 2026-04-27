@@ -15,6 +15,9 @@ import { cmdSkills } from './skills.js';
 import { cmdParity } from './parity.js';
 import { cmdVersion } from './version.js';
 import { cmdHelp } from './help.js';
+import { cmdLogin } from './login.js';
+import { cmdLogout } from './logout.js';
+import { cmdUninstall } from './uninstall.js';
 
 type CommandFn = (args: string[], flags: Record<string, string | boolean>) => Promise<number>;
 
@@ -36,6 +39,9 @@ const COMMANDS: Record<string, CommandFn> = {
   parity: cmdParity,
   version: cmdVersion,
   help: cmdHelp,
+  login: cmdLogin,
+  logout: cmdLogout,
+  uninstall: cmdUninstall,
 };
 
 export async function runCommand(

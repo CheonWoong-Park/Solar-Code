@@ -9,6 +9,7 @@ dist/
 npm-debug.log*
 
 # Solar Code state directories (project-local)
+.solar-code/
 .oms/
 
 # OS

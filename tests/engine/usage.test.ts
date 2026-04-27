@@ -9,7 +9,7 @@ describe('usage accounting', () => {
   let omsDir: string;
 
   beforeEach(() => {
-    omsDir = join(tmpdir(), `solar-usage-test-${randomBytes(4).toString('hex')}`, '.oms');
+    omsDir = join(tmpdir(), `solar-usage-test-${randomBytes(4).toString('hex')}`, '.solar-code');
     mkdirSync(omsDir, { recursive: true });
   });
 

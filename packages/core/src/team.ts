@@ -106,7 +106,7 @@ export async function runTeamSession(
   session: TeamSession,
   omsDir: string,
   model: string,
-  apiKey: string | undefined
+  _apiKey: string | undefined
 ): Promise<void> {
   const useTmux = isTmuxAvailable();
   const sessionDir = join(omsDir, 'team', session.id);
@@ -144,11 +144,11 @@ export async function runTeamSession(
           encoding: 'utf-8',
         });
       }
-      // Run claw (or echo if not available) in the tmux pane
-      const clawCmd = buildClawCmd(model, workerPrompt, apiKey);
+      // Run Solar Code in the tmux pane; auth is resolved by the child CLI.
+      const workerCmd = buildSolarWorkerCmd(model, workerPrompt);
       spawnSync(
         'tmux',
-        ['send-keys', '-t', `${tmuxSession}:${windowName}`, `cd ${worker.worktreePath} && ${clawCmd}`, 'Enter'],
+        ['send-keys', '-t', `${tmuxSession}:${windowName}`, `cd ${shellQuote(worker.worktreePath)} && ${workerCmd}`, 'Enter'],
         { encoding: 'utf-8' }
       );
     } else {
@@ -195,12 +195,12 @@ function buildWorkerPrompt(worker: WorkerSpec): string {
   return `${roleInstructions[worker.role]}\n\nGoal: ${worker.goal}`;
 }
 
-function buildClawCmd(model: string, prompt: string, apiKey?: string): string {
-  const escaped = prompt.replace(/'/g, "'\\''");
-  const envPrefix = apiKey
-    ? `OPENAI_API_KEY='${apiKey}' OPENAI_BASE_URL='${process.env['UPSTAGE_BASE_URL'] ?? 'https://api.upstage.ai/v1'}' `
-    : '';
-  return `${envPrefix}claw prompt '${escaped}' --model '${model}'`;
+export function shellQuote(value: string): string {
+  return `'${value.replace(/'/g, "'\\''")}'`;
+}
+
+export function buildSolarWorkerCmd(model: string, prompt: string): string {
+  return `solar --yes --model ${shellQuote(model)} ${shellQuote(prompt)}`;
 }
 
 export function getLastTeamSession(omsDir: string): TeamSession | null {

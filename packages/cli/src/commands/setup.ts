@@ -38,26 +38,26 @@ export async function cmdSetup(
 
   process.stdout.write(`\nSetting up Solar Code in ${cwd}\n\n`);
 
-  // Create .oms/ directory structure
+  // Create .solar-code/ directory structure
   ensureOmsDirs(omsDir);
-  process.stdout.write(`  [OK] Created .oms/ directory structure\n`);
+  process.stdout.write(`  [OK] Created .solar-code/ directory structure\n`);
 
   // Write default config (do not overwrite if exists)
   const configPath = join(omsDir, 'config.json');
   if (!existsSync(configPath)) {
     saveConfig(DEFAULT_CONFIG, cwd);
-    process.stdout.write(`  [OK] Created .oms/config.json\n`);
+    process.stdout.write(`  [OK] Created .solar-code/config.json\n`);
   } else {
-    process.stdout.write(`  [--] .oms/config.json already exists — skipped\n`);
+    process.stdout.write(`  [--] .solar-code/config.json already exists — skipped\n`);
   }
 
   // Write default hooks.json
   const hooksPath = join(omsDir, 'hooks.json');
   if (!existsSync(hooksPath)) {
     writeAtomic(hooksPath, JSON.stringify(DEFAULT_HOOKS, null, 2));
-    process.stdout.write(`  [OK] Created .oms/hooks.json\n`);
+    process.stdout.write(`  [OK] Created .solar-code/hooks.json\n`);
   } else {
-    process.stdout.write(`  [--] .oms/hooks.json already exists — skipped\n`);
+    process.stdout.write(`  [--] .solar-code/hooks.json already exists — skipped\n`);
   }
 
   // Install built-in agent templates
@@ -74,15 +74,15 @@ export async function cmdSetup(
     installTemplates(skillsTemplateDir, skillsTargetDir, 'skills');
   }
 
-  // Offer to add .oms/ to .gitignore
+  // Offer to add .solar-code/ to .gitignore
   const gitignorePath = join(cwd, '.gitignore');
   if (existsSync(gitignorePath)) {
     const current = readFileSync(gitignorePath, 'utf-8');
-    if (!current.includes('.oms/')) {
+    if (!current.includes('.solar-code/')) {
       process.stdout.write(
-        `\n  .oms/ is not in .gitignore. Adding it is recommended to avoid committing state.\n`
+        `\n  .solar-code/ is not in .gitignore. Adding it is recommended to avoid committing state.\n`
       );
-      process.stdout.write(`  Run: echo '.oms/' >> .gitignore\n`);
+      process.stdout.write(`  Run: echo '.solar-code/' >> .gitignore\n`);
     }
   }
 
@@ -90,7 +90,7 @@ export async function cmdSetup(
 Setup complete!
 
 Next steps:
-  export UPSTAGE_API_KEY="up_..."
+  solar login
   solar
   /doctor
 

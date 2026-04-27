@@ -3,6 +3,6 @@
   "description": "Code review, security review, regression checks",
   "model": "solar-pro3",
   "tools": ["read_file", "bash", "search"],
-  "outputContract": "review.md in .oms/logs/reviews/",
+  "outputContract": "review.md in .solar-code/logs/reviews/",
   "failureHandling": "If diff is too large, review top-level structure and flag for manual review."
 }

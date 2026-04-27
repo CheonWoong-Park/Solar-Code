@@ -3,6 +3,6 @@
   "description": "System design, repo architecture, API boundary decisions",
   "model": "solar-pro3",
   "tools": ["read_file", "list_files", "search"],
-  "outputContract": "architecture.md in project root or .oms/plans/",
+  "outputContract": "architecture.md in project root or .solar-code/plans/",
   "failureHandling": "If no existing code, create from first principles. If existing code, analyze and propose improvements."
 }

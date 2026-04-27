@@ -9,4 +9,4 @@ Review the current git diff with Solar. Analyze for:
 - Code quality
 - Missing tests
 
-Save review to `.oms/logs/reviews/`.
+Save review to `.solar-code/logs/reviews/`.

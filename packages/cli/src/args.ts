@@ -22,7 +22,7 @@ export function parseArgs(argv: string[]): ParsedArgs {
   const KNOWN_COMMANDS = new Set([
     'setup', 'doctor', 'chat', 'code', 'plan', 'review', 'tdd',
     'parse', 'team', 'hud', 'resume', 'agents', 'skills',
-    'parity', 'version', 'help',
+    'parity', 'version', 'help', 'login', 'logout', 'uninstall',
   ]);
 
   const command = KNOWN_COMMANDS.has(first ?? '') ? (first ?? 'default') : 'default';

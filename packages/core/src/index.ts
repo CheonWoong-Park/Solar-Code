@@ -1,4 +1,5 @@
 export * from './config.js';
+export * from './auth.js';
 export * from './state.js';
 export * from './provider/index.js';
 export * from './backend/index.js';

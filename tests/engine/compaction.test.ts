@@ -21,7 +21,7 @@ describe('session compaction', () => {
 
   beforeEach(() => {
     tmpDir = join(tmpdir(), `solar-compaction-test-${randomBytes(4).toString('hex')}`);
-    omsDir = join(tmpDir, '.oms');
+    omsDir = join(tmpDir, '.solar-code');
     mkdirSync(omsDir, { recursive: true });
   });
 

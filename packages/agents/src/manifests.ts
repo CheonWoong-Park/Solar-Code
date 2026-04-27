@@ -14,7 +14,7 @@ export const BUILT_IN_AGENTS: AgentManifest[] = [
     description: 'Turns vague requests into clear, actionable plans',
     model: 'solar-pro3',
     tools: ['read_file', 'list_files', 'search'],
-    outputContract: 'plan.md written to .oms/plans/',
+    outputContract: 'plan.md written to .solar-code/plans/',
     failureHandling: 'If goal is too vague, ask one clarifying question before proceeding',
   },
   {
@@ -22,7 +22,7 @@ export const BUILT_IN_AGENTS: AgentManifest[] = [
     description: 'System design, repo architecture, API boundary decisions',
     model: 'solar-pro3',
     tools: ['read_file', 'list_files', 'search'],
-    outputContract: 'architecture.md in project root or .oms/plans/',
+    outputContract: 'architecture.md in project root or .solar-code/plans/',
     failureHandling: 'If no existing code, create from first principles',
   },
   {
@@ -38,7 +38,7 @@ export const BUILT_IN_AGENTS: AgentManifest[] = [
     description: 'Code review, security review, regression checks',
     model: 'solar-pro3',
     tools: ['read_file', 'bash', 'search'],
-    outputContract: 'review.md in .oms/logs/reviews/',
+    outputContract: 'review.md in .solar-code/logs/reviews/',
     failureHandling: 'If diff is too large, review top-level structure and flag for manual review',
   },
   {
@@ -54,7 +54,7 @@ export const BUILT_IN_AGENTS: AgentManifest[] = [
     description: 'Upstage Document Parse + structured info extraction + Korean document summarization',
     model: 'solar-pro3',
     tools: ['read_file', 'oms_parse_document'],
-    outputContract: 'structured JSON + summary markdown in .oms/parsed/',
+    outputContract: 'structured JSON + summary markdown in .solar-code/parsed/',
     failureHandling: 'If file format unsupported, list supported formats',
   },
   {

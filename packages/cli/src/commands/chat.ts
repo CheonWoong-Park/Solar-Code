@@ -19,7 +19,7 @@ export async function cmdChat(
   const apiKey = getUpstageApiKey();
   if (!apiKey) {
     process.stderr.write(
-      'Error: UPSTAGE_API_KEY is not set.\nexport UPSTAGE_API_KEY="up_..."\n'
+      'Error: Solar Code auth is not set. Run `solar login` and paste your Upstage API key.\n'
     );
     return 1;
   }

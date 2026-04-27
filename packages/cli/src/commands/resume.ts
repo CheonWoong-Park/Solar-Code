@@ -5,11 +5,11 @@
 import {
   getOmsDir,
   loadConfig,
-  getUpstageApiKey,
   getLastSession,
 } from '@solar-code/core';
 import { permissionModeFromFlags, permissionProfileFromFlags, runAgent } from '@solar-code/engine';
 import { runSlashCommand } from '../slash.js';
+import { ensureUpstageApiKey } from '../upstage-key.js';
 
 export async function cmdResume(
   args: string[],
@@ -25,10 +25,8 @@ export async function cmdResume(
     return 1;
   }
 
-  const apiKey = getUpstageApiKey();
   const mockMode = process.env['SOLAR_MOCK'] === '1';
-  if (!apiKey && !mockMode) {
-    process.stderr.write('UPSTAGE_API_KEY not set.\n');
+  if (!mockMode && !(await ensureUpstageApiKey())) {
     return 1;
   }
 

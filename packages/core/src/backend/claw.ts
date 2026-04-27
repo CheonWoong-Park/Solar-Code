@@ -1,7 +1,7 @@
 /**
  * Claw Code backend adapter.
  * Locates the `claw` binary, passes Solar model flags, streams output,
- * preserves exit codes, and collects logs into .oms/logs/.
+ * preserves exit codes, and collects logs into .solar-code/logs/.
  */
 
 import { spawnSync, spawn } from 'child_process';
@@ -9,6 +9,7 @@ import { existsSync } from 'fs';
 import { join, dirname } from 'path';
 import { fileURLToPath } from 'url';
 import { appendLog } from '../state.js';
+import { getUpstageApiKey, getUpstageBaseUrl } from '../config.js';
 import type { Backend, BackendRunOptions, BackendRunResult } from './types.js';
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
@@ -107,14 +108,15 @@ export class ClawBackend implements Backend {
       args.push('--model', opts.model);
     }
 
+    const apiKey = getUpstageApiKey();
     const env: NodeJS.ProcessEnv = {
       ...process.env,
       ...(opts.env ?? {}),
       // Wire Upstage Solar through OpenAI-compat in claw
-      ...(process.env['UPSTAGE_API_KEY'] && !opts.env?.['OPENAI_API_KEY']
+      ...(apiKey && !opts.env?.['OPENAI_API_KEY']
         ? {
-            OPENAI_API_KEY: process.env['UPSTAGE_API_KEY'],
-            OPENAI_BASE_URL: process.env['UPSTAGE_BASE_URL'] ?? 'https://api.upstage.ai/v1',
+            OPENAI_API_KEY: apiKey,
+            OPENAI_BASE_URL: getUpstageBaseUrl(),
           }
         : {}),
     };

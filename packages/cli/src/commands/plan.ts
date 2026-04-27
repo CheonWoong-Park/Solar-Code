@@ -1,5 +1,5 @@
 /**
- * oms plan [goal] — AI planning workflow → .oms/plans/
+ * oms plan [goal] — AI planning workflow → .solar-code/plans/
  */
 
 import { join } from 'path';
@@ -41,7 +41,7 @@ export async function cmdPlan(
 ): Promise<number> {
   const apiKey = getUpstageApiKey();
   if (!apiKey) {
-    process.stderr.write('Error: UPSTAGE_API_KEY is not set.\n');
+    process.stderr.write('Error: Solar Code auth is not set. Run `solar login`.\n');
     return 1;
   }
 

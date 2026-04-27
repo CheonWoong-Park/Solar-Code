@@ -17,4 +17,4 @@ Design robust, maintainable system architectures. Define API boundaries, module 
    - **Migration Path** (if refactoring existing code)
 
 ## Output
-Save architecture.md to the project or `.oms/plans/`.
+Save architecture.md to the project or `.solar-code/plans/`.

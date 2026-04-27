@@ -1,12 +1,34 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
+import { mkdirSync, rmSync } from 'fs';
+import { join } from 'path';
+import { tmpdir } from 'os';
+import { randomBytes } from 'crypto';
 import { UpstageProvider } from '../../packages/core/src/provider/upstage.js';
 
 describe('UpstageProvider constructor', () => {
-  it('throws if no API key is provided and env var is not set', () => {
-    const originalKey = process.env['UPSTAGE_API_KEY'];
+  let tmpHome: string;
+  let originalSolarCodeHome: string | undefined;
+  let originalKey: string | undefined;
+
+  beforeEach(() => {
+    originalSolarCodeHome = process.env['SOLAR_CODE_HOME'];
+    originalKey = process.env['UPSTAGE_API_KEY'];
+    tmpHome = join(tmpdir(), `solar-code-provider-test-${randomBytes(4).toString('hex')}`);
+    mkdirSync(tmpHome, { recursive: true });
+    process.env['SOLAR_CODE_HOME'] = tmpHome;
     delete process.env['UPSTAGE_API_KEY'];
-    expect(() => new UpstageProvider()).toThrow('UPSTAGE_API_KEY');
-    if (originalKey) process.env['UPSTAGE_API_KEY'] = originalKey;
+  });
+
+  afterEach(() => {
+    rmSync(tmpHome, { recursive: true, force: true });
+    if (originalSolarCodeHome === undefined) delete process.env['SOLAR_CODE_HOME'];
+    else process.env['SOLAR_CODE_HOME'] = originalSolarCodeHome;
+    if (originalKey === undefined) delete process.env['UPSTAGE_API_KEY'];
+    else process.env['UPSTAGE_API_KEY'] = originalKey;
+  });
+
+  it('throws if no API key is provided and env var is not set', () => {
+    expect(() => new UpstageProvider()).toThrow('Solar Code auth');
   });
 
   it('accepts explicit API key', () => {
@@ -16,7 +38,6 @@ describe('UpstageProvider constructor', () => {
   it('does not throw when env var is set', () => {
     process.env['UPSTAGE_API_KEY'] = 'up_test_key_12345';
     expect(() => new UpstageProvider()).not.toThrow();
-    delete process.env['UPSTAGE_API_KEY'];
   });
 });
 

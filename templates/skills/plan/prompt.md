@@ -11,6 +11,6 @@ Include:
 4. Test strategy
 5. Risk register
 
-Save output to `.oms/plans/`.
+Save output to `.solar-code/plans/`.
 
 Goal: {{GOAL}}

@@ -2,18 +2,17 @@
  * solar code [prompt] — native Solar Code agent.
  */
 
-import { loadConfig, getOmsDir, getUpstageApiKey } from '@solar-code/core';
+import { loadConfig, getOmsDir } from '@solar-code/core';
 import { permissionModeFromFlags, permissionProfileFromFlags, runAgent } from '@solar-code/engine';
 import { runSlashCommand } from '../slash.js';
+import { ensureUpstageApiKey } from '../upstage-key.js';
 
 export async function cmdCode(
   args: string[],
   flags: Record<string, string | boolean>
 ): Promise<number> {
-  const apiKey = getUpstageApiKey();
   const mockMode = process.env['SOLAR_MOCK'] === '1';
-  if (!apiKey && !mockMode) {
-    process.stderr.write('Error: UPSTAGE_API_KEY is not set.\nexport UPSTAGE_API_KEY="up_..."\n');
+  if (!mockMode && !(await ensureUpstageApiKey())) {
     return 1;
   }
 

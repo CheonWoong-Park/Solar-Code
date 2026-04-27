@@ -3,7 +3,7 @@
  * API docs: https://developers.upstage.ai/docs/apis/document-parse
  *
  * Uploads a document file, receives markdown/html output,
- * saves to .oms/parsed/<safe-name>.md
+ * saves to .solar-code/parsed/<safe-name>.md
  */
 
 import { readFileSync, mkdirSync, existsSync } from 'fs';
@@ -48,7 +48,7 @@ export async function parseDocument(opts: DocumentParseOptions): Promise<Documen
   const apiKey = opts.apiKey ?? getUpstageApiKey();
   if (!apiKey) {
     throw new Error(
-      'UPSTAGE_API_KEY is required for document parsing. Run `oms setup` or export UPSTAGE_API_KEY="up_..."'
+      'Solar Code auth is required for document parsing. Run `solar` or `solar login` and paste your Upstage API key.'
     );
   }
 

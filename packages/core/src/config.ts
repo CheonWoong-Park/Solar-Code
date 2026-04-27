@@ -1,6 +1,7 @@
 import { readFileSync, existsSync, mkdirSync } from 'fs';
 import { join } from 'path';
 import { writeAtomic } from './state.js';
+import { getStoredUpstageApiKey } from './auth.js';
 
 export interface OmsConfig {
   provider: 'upstage' | 'openai' | 'anthropic' | 'xai' | 'custom';
@@ -44,12 +45,12 @@ export const DEFAULT_CONFIG: OmsConfig = {
   },
   hooks: {
     enabled: true,
-    hooksFile: '.oms/hooks.json',
+    hooksFile: '.solar-code/hooks.json',
   },
 };
 
 export function getOmsDir(cwd = process.cwd()): string {
-  return join(cwd, '.oms');
+  return join(cwd, '.solar-code');
 }
 
 export function getConfigPath(cwd = process.cwd()): string {
@@ -91,7 +92,7 @@ function deepMerge(base: any, override: any): any {
 }
 
 export function getUpstageApiKey(): string | undefined {
-  return process.env['UPSTAGE_API_KEY'];
+  return process.env['UPSTAGE_API_KEY']?.trim() || getStoredUpstageApiKey();
 }
 
 export function getUpstageBaseUrl(): string {

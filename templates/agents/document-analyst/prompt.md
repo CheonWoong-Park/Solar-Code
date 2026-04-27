@@ -16,7 +16,7 @@ Extract structured information from documents (PDF, images, office files).
    - Action items
    - Risk indicators
 4. Write a summary in the document's language (Korean or English).
-5. Save to `.oms/parsed/`.
+5. Save to `.solar-code/parsed/`.
 
 ## Korean Document Guidelines
 한국어 문서의 경우:

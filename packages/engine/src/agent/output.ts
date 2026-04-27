@@ -1,6 +1,7 @@
 import { existsSync, readdirSync, readFileSync, statSync } from 'fs';
 import { join, relative } from 'path';
 import { userInfo } from 'os';
+import { getUpstageApiKey } from '@solar-code/core';
 import type { PermissionMode } from './permissions.js';
 import type { ToolResult } from '../tools/index.js';
 
@@ -16,6 +17,11 @@ const PURPLE = '\x1b[38;5;141m';
 const WHITE = '\x1b[38;5;255m';
 const INPUT_BG = '\x1b[48;5;236m';
 const ANSI_PATTERN = /\x1b\[[0-9;]*m/g;
+const INPUT_CARD_LINES = 3;
+const INPUT_STATUS_LINES = 2;
+const INPUT_PROMPT_ROWS = INPUT_CARD_LINES + 1 + INPUT_STATUS_LINES;
+const INPUT_PLACEHOLDER_LINE = Math.floor(INPUT_CARD_LINES / 2);
+const INPUT_PROMPT_REWIND_ROWS = INPUT_PROMPT_ROWS - INPUT_PLACEHOLDER_LINE;
 
 interface RgbColor {
   r: number;
@@ -315,13 +321,18 @@ export function printUserPrompt(): string {
 export function printInputPlaceholder(options: PromptStatusOptions): void {
   const width = terminalWidth();
   const placeholder = truncate('› Ask Solar Code or type /help', width);
-  const status = truncate(`${options.model} ${modeText(options.permissionMode)} · ${options.cwd}`, width - 4);
-  process.stdout.write(`${paintInputLine(placeholder, GRAY)}\n\n  ${paint(status, GRAY)}\n`);
-  process.stdout.write('\x1b[3A\r');
+  const statusTitle = truncate(`✦ Solar Code   ${options.model}   ${modeText(options.permissionMode)}`, width - 4);
+  const statusPath = truncate(`workspace ${options.cwd}`, width - 4);
+  process.stdout.write('\n');
+  for (let i = 0; i < INPUT_CARD_LINES; i++) {
+    process.stdout.write(`${paintInputLine(i === INPUT_PLACEHOLDER_LINE ? placeholder : '', GRAY)}\n`);
+  }
+  process.stdout.write(`\n  ${paint(statusTitle, PURPLE)}\n  ${paint(statusPath, GRAY)}\n`);
+  process.stdout.write(`\x1b[${INPUT_PROMPT_REWIND_ROWS}A\r`);
 }
 
 export function finishInputPrompt(): void {
-  process.stdout.write('\x1b[3B\r');
+  process.stdout.write('\x1b[1B\r\x1b[J');
 }
 
 export function renderInputBuffer(buffer: string, cursor = Array.from(buffer).length): void {
@@ -511,7 +522,7 @@ export function printStatusPanel(options: SessionBannerOptions & { turns: number
   process.stdout.write(`mode:     ${modeText(options.permissionMode)}\n`);
   process.stdout.write(`turns:    ${options.turns}/${options.maxTurns}\n`);
   process.stdout.write(`messages: ${options.messageCount}\n`);
-  process.stdout.write(`network:  ${process.env['UPSTAGE_API_KEY'] ? 'online' : 'offline - UPSTAGE_API_KEY not set'}\n`);
+  process.stdout.write(`network:  ${getUpstageApiKey() ? 'online' : 'offline - Solar Code auth not set'}\n`);
 }
 
 export function printHistory(omsDir: string): void {

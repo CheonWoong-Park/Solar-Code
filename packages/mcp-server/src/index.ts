@@ -4,9 +4,9 @@
  * Exposes Solar Code capabilities via the Model Context Protocol (MCP).
  *
  * Capabilities:
- *   oms_state_read       — read .oms/ state
- *   oms_state_write      — write .oms/ state
- *   oms_memory_search    — search .oms/memory/
+ *   oms_state_read       — read .solar-code/ state
+ *   oms_state_write      — write .solar-code/ state
+ *   oms_memory_search    — search .solar-code/memory/
  *   oms_plan_create      — create a plan via Solar
  *   oms_parse_document   — parse a document via Upstage
  *   oms_team_status      — get team session status
@@ -43,22 +43,22 @@ interface JsonRpcResponse {
 const TOOLS = [
   {
     name: 'oms_state_read',
-    description: 'Read a file from the .oms/ state directory',
+    description: 'Read a file from the .solar-code/ state directory',
     inputSchema: {
       type: 'object',
       properties: {
-        path: { type: 'string', description: 'Relative path within .oms/' },
+        path: { type: 'string', description: 'Relative path within .solar-code/' },
       },
       required: ['path'],
     },
   },
   {
     name: 'oms_state_write',
-    description: 'Write a file to the .oms/ state directory',
+    description: 'Write a file to the .solar-code/ state directory',
     inputSchema: {
       type: 'object',
       properties: {
-        path: { type: 'string', description: 'Relative path within .oms/' },
+        path: { type: 'string', description: 'Relative path within .solar-code/' },
         content: { type: 'string', description: 'Content to write' },
       },
       required: ['path', 'content'],
@@ -66,7 +66,7 @@ const TOOLS = [
   },
   {
     name: 'oms_memory_search',
-    description: 'Search .oms/memory/ files for a query string',
+    description: 'Search .solar-code/memory/ files for a query string',
     inputSchema: {
       type: 'object',
       properties: {
@@ -144,7 +144,7 @@ async function handleTool(name: string, params: Record<string, unknown>): Promis
     }
     case 'oms_parse_document': {
       const apiKey = getUpstageApiKey();
-      if (!apiKey) return { error: 'UPSTAGE_API_KEY not set' };
+      if (!apiKey) return { error: 'Solar Code auth not set' };
       const result = await parseDocument({
         filePath: params['filePath'] as string,
         outputFormat: (params['outputFormat'] as 'markdown' | 'html' | 'text') ?? 'markdown',

@@ -69,5 +69,5 @@ export async function fireHooks(
 export const HOOKS_SECURITY_WARNING = `
 SECURITY WARNING: OMS hooks execute shell commands.
 Only enable hooks from sources you trust.
-Review .oms/hooks.json before enabling.
+Review .solar-code/hooks.json before enabling.
 `;

@@ -73,7 +73,7 @@ Solar Code provides:
 - Solar function-calling engine
 - Workspace-scoped file tools
 - Safe approval flow for file writes and command execution
-- Persistent project state under `.oms/`
+- Persistent project state under `.solar-code/`
 - Compatibility with existing `oms` workflows
 
 ---
@@ -84,11 +84,13 @@ Solar Code provides:
 npm install -g solar-code
 ```
 
-Set your Upstage API key:
+Save your Upstage API key:
 
 ```bash
-export UPSTAGE_API_KEY="up_..."
+solar login
 ```
+
+If no key is saved yet, running `solar` will show the Upstage getting-started page and wait for you to paste a key.
 
 Optionally, configure a custom base URL:
 
@@ -179,7 +181,7 @@ Inside the interactive shell, you can use slash commands.
 | `/history` | Show recent activity |
 | `/clear` | Redraw the dashboard |
 | `/doctor` | Run environment checks |
-| `/setup` | Initialize `.oms/` project state |
+| `/setup` | Initialize `.solar-code/` project state |
 | `/agents` | List or inspect agent profiles |
 | `/oms <command>` | Run legacy `oms` commands inside the agent shell |
 
@@ -223,6 +225,8 @@ Legacy commands continue to work:
 ```bash
 solar setup
 solar doctor
+solar login
+solar logout
 solar parse ./report.pdf --ask "Summarize this"
 solar team 3 "Refactor the payment module"
 
@@ -276,7 +280,7 @@ flowchart LR
     Engine --> Solar["Upstage Solar API"]
     Engine --> Tools["Local Tools"]
     Tools --> Workspace["Current Workspace"]
-    Shell --> State[".oms Project State"]
+    Shell --> State[".solar-code Project State"]
 ```
 
 Available tools:
@@ -325,10 +329,10 @@ solar --yes "fix formatting and run tests"
 
 ## Project State
 
-Solar Code currently stores project state under `.oms/` for compatibility.
+Solar Code stores project-local state under `.solar-code/`.
 
 ```text
-.oms/
+.solar-code/
   config.json
   sessions/
   state/
@@ -343,7 +347,7 @@ Solar Code currently stores project state under `.oms/` for compatibility.
 Session history is saved in JSONL format:
 
 ```text
-.oms/sessions/
+.solar-code/sessions/
 ```
 
 This allows Solar Code to resume previous sessions and preserve project-local context.
@@ -420,17 +424,41 @@ The test suite includes:
 
 ---
 
+## Authentication
+
+Solar Code stores auth in:
+
+```text
+~/.solar-code/auth.json
+```
+
+This follows the same local-home auth-file pattern used by Codex. `UPSTAGE_API_KEY` is still supported as an override.
+
+Remove saved auth:
+
+```bash
+solar logout
+```
+
+Remove all Solar Code user-home data:
+
+```bash
+solar uninstall
+```
+
+`solar uninstall` also removes project-local `.solar-code/` and legacy `.oms/` from the current directory if present.
+`npm uninstall -g solar-code` removes `~/.solar-code` as a best-effort cleanup.
+
 ## Environment Variables
 
 | Variable | Required | Description |
 | --- | --- | --- |
-| `UPSTAGE_API_KEY` | Yes | Upstage API key |
+| `UPSTAGE_API_KEY` | No | Optional Upstage API key override |
 | `UPSTAGE_BASE_URL` | No | Custom Upstage-compatible API base URL |
 
 Example:
 
 ```bash
-export UPSTAGE_API_KEY="up_..."
 export UPSTAGE_BASE_URL="https://..."
 ```
 

@@ -10,4 +10,4 @@ Explore the repository and produce a comprehensive map covering:
 6. **Testing Strategy** — test locations and patterns
 7. **Build System** — how to build, run, and test
 
-Save to `.oms/plans/repo-map.md`.
+Save to `.solar-code/plans/repo-map.md`.

@@ -27,9 +27,12 @@ SLASH COMMANDS
   /setup                       Shortcut for /oms setup
   /agents                      Shortcut for /oms agents
 
-LEGACY SHELL COMMANDS
-  solar setup                  Initialize .oms/ in the current project
+COMMANDS
+  solar setup                  Initialize .solar-code/ in the current project
   solar doctor                 Check environment and configuration
+  solar login                  Save Upstage API key to ~/.solar-code/auth.json
+  solar logout                 Remove saved Solar Code auth
+  solar uninstall              Remove ~/.solar-code user data
   solar parse <file>           Parse document with Upstage
   solar team <n> <goal>        Spawn parallel workers
   solar resume                 Resume last session
@@ -39,7 +42,8 @@ COMPATIBILITY
   oms still works as an alias while the project moves to Solar Code.
 
 ENVIRONMENT
-  UPSTAGE_API_KEY              Required for Solar API access
+  ~/.solar-code/auth.json      Saved Solar Code API key
+  UPSTAGE_API_KEY              Optional override for Solar API access
   UPSTAGE_BASE_URL             Override API base URL
   OMS_DEBUG                    Enable verbose debug output
 

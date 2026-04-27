@@ -7,7 +7,7 @@ Checks:
 - UPSTAGE_API_KEY status (never reveals the key)
 - Claw Code backend availability
 - tmux availability
-- .oms/ state validity
+- .solar-code/ state validity
 - All required tools
 
 Reports OK / WARN / FAIL for each item.

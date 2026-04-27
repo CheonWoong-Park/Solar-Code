@@ -9,7 +9,9 @@ import { join } from 'path';
 import {
   getOmsDir,
   loadConfig,
+  getSolarCodeAuthPath,
   getUpstageBaseUrl,
+  getUpstageApiKey,
   resolveClawBinary,
 } from '@solar-code/core';
 import { readFileSync } from 'fs';
@@ -44,22 +46,22 @@ function checkPackageVersion(): Check {
 }
 
 function checkUpstageApiKey(): Check {
-  const key = process.env['UPSTAGE_API_KEY'];
+  const key = getUpstageApiKey();
   if (!key) {
     return {
-      name: 'UPSTAGE_API_KEY',
+      name: 'Solar Code auth',
       status: 'fail',
-      message: 'Not set — export UPSTAGE_API_KEY="up_..."',
+      message: `Not set — run solar and paste a key (${getSolarCodeAuthPath()})`,
     };
   }
   if (!key.startsWith('up_')) {
     return {
-      name: 'UPSTAGE_API_KEY',
+      name: 'Solar Code auth',
       status: 'warn',
       message: 'Set (does not start with "up_" — double check your key)',
     };
   }
-  return { name: 'UPSTAGE_API_KEY', status: 'ok', message: 'Set [REDACTED]' };
+  return { name: 'Solar Code auth', status: 'ok', message: 'Set [REDACTED]' };
 }
 
 function checkUpstageBaseUrl(): Check {
@@ -94,16 +96,16 @@ function checkOmsDir(): Check {
   const omsDir = getOmsDir(process.cwd());
   if (!existsSync(omsDir)) {
     return {
-      name: '.oms/ state',
+      name: '.solar-code/ state',
       status: 'warn',
       message: 'Not initialized — run `/setup` inside Solar Code or `solar setup`',
     };
   }
   const configPath = join(omsDir, 'config.json');
   if (!existsSync(configPath)) {
-    return { name: '.oms/ state', status: 'warn', message: 'Missing config.json — run `/setup` inside Solar Code or `solar setup`' };
+    return { name: '.solar-code/ state', status: 'warn', message: 'Missing config.json — run `/setup` inside Solar Code or `solar setup`' };
   }
-  return { name: '.oms/ state', status: 'ok', message: omsDir };
+  return { name: '.solar-code/ state', status: 'ok', message: omsDir };
 }
 
 function checkConfig(): Check {
@@ -120,10 +122,10 @@ function checkConfig(): Check {
 }
 
 function checkDocumentParse(): Check {
-  const key = process.env['UPSTAGE_API_KEY'];
+  const key = getUpstageApiKey();
   const config = loadConfig(process.cwd());
   if (!key) {
-    return { name: 'Document Parse', status: 'warn', message: 'UPSTAGE_API_KEY not set' };
+    return { name: 'Document Parse', status: 'warn', message: 'Solar Code auth not set' };
   }
   if (!config.documentParse.enabled) {
     return { name: 'Document Parse', status: 'warn', message: 'Disabled in config' };

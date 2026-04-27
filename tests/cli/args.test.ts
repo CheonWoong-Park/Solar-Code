@@ -28,6 +28,9 @@ describe('parseArgs', () => {
     expect(parseArgs(['review']).command).toBe('review');
     expect(parseArgs(['parse']).command).toBe('parse');
     expect(parseArgs(['team']).command).toBe('team');
+    expect(parseArgs(['login']).command).toBe('login');
+    expect(parseArgs(['logout']).command).toBe('logout');
+    expect(parseArgs(['uninstall']).command).toBe('uninstall');
   });
 
   it('parses command with positional args', () => {

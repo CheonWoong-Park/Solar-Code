@@ -129,7 +129,7 @@ export async function streamChatCompletion(options: StreamChatOptions): Promise<
 
   const apiKey = getUpstageApiKey();
   if (!apiKey) {
-    throw new Error('UPSTAGE_API_KEY is not set. export UPSTAGE_API_KEY="up_..."');
+    throw new Error('Solar Code auth is not set. Run `solar` or `solar login` and paste your Upstage API key.');
   }
 
   const baseUrl = getUpstageBaseUrl().replace(/\/$/, '');

@@ -4,22 +4,22 @@
   "hooks": [
     {
       "event": "SessionStart",
-      "command": "echo \"[oms] Session started at $(date)\" >> ~/.oms-audit.log",
+      "command": "echo \"[oms] Session started at $(date)\" >> ~/.solar-code-audit.log",
       "description": "Append session start to audit log"
     },
     {
       "event": "BeforeCommand",
-      "command": "echo \"[oms] Command: $OMS_COMMAND\" >> ~/.oms-audit.log",
+      "command": "echo \"[oms] Command: $OMS_COMMAND\" >> ~/.solar-code-audit.log",
       "description": "Log commands before execution"
     },
     {
       "event": "AfterToolUse",
-      "command": "echo \"[oms] Tool used: $OMS_TOOL\" >> ~/.oms-audit.log",
+      "command": "echo \"[oms] Tool used: $OMS_TOOL\" >> ~/.solar-code-audit.log",
       "description": "Log tool usage"
     },
     {
       "event": "Stop",
-      "command": "echo \"[oms] Session ended\" >> ~/.oms-audit.log",
+      "command": "echo \"[oms] Session ended\" >> ~/.solar-code-audit.log",
       "description": "Log session end"
     }
   ]
