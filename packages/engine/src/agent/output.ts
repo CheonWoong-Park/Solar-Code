@@ -304,12 +304,10 @@ function printWelcomeDashboard(options: SessionBannerOptions): void {
   process.stdout.write(`${boxRow(width, '')}\n`);
   process.stdout.write(`${boxGradientRow(width, subtitle, SUBTITLE_COLORS)}\n`);
   process.stdout.write(`${boxRow(width, '')}\n`);
-  process.stdout.write(`${boxRow(width, `model:     ${options.model}    /model`)}\n`);
-  process.stdout.write(`${boxRow(width, `directory: ${options.cwd}`)}\n`);
+  process.stdout.write(`${boxRow(width, `status  ${options.model} · ${modeText(options.permissionMode)}`)}\n`);
+  process.stdout.write(`${boxRow(width, `workspace  ${options.cwd}`)}\n`);
   process.stdout.write(`${boxRow(width, '')}\n`);
-  process.stdout.write(`${boxRow(width, 'Tips: /init  /agents  /model  /help  /status')}\n`);
-  process.stdout.write(`${boxRow(width, 'Commands: /doctor  /setup  /oms <legacy-command>')}\n`);
-  process.stdout.write(`${boxRow(width, '')}\n`);
+  process.stdout.write(`${boxRow(width, 'start  ask a question, or use /help')}\n`);
 
   process.stdout.write(`${boxBottom(width)}\n\n`);
 }
@@ -346,6 +344,32 @@ export function renderInputBuffer(buffer: string, cursor = Array.from(buffer).le
   process.stdout.write(`\r\x1b[2K${paintInputLine(`${prompt}${buffer}`, WHITE)}`);
   const rewind = Math.max(0, lineWidth - cursorColumn);
   if (rewind > 0) process.stdout.write(`\x1b[${rewind}D`);
+}
+
+export function renderInputAppend(text: string): void {
+  if (!text) return;
+  process.stdout.write(useColor() ? `${INPUT_BG}${WHITE}${text}${RESET}` : text);
+}
+
+export function moveInputCursorLeft(text: string): void {
+  const width = displayWidth(text);
+  if (width > 0) process.stdout.write(`\x1b[${width}D`);
+}
+
+export function moveInputCursorRight(text: string): void {
+  const width = displayWidth(text);
+  if (width > 0) process.stdout.write(`\x1b[${width}C`);
+}
+
+export function eraseInputSuffix(text: string): void {
+  const width = displayWidth(text);
+  if (width <= 0) return;
+  const spaces = ' '.repeat(width);
+  process.stdout.write(`\x1b[${width}D${useColor() ? `${INPUT_BG}${spaces}${RESET}` : spaces}\x1b[${width}D`);
+}
+
+export function clearInputTail(): void {
+  process.stdout.write(useColor() ? `${INPUT_BG}\x1b[K${RESET}` : '\x1b[K');
 }
 
 export function printAssistantPrefix(): void {

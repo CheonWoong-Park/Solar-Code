@@ -7,51 +7,51 @@ Solar Code includes 7 built-in agents, each with a specific role and output cont
 ### planner
 Turns vague requests into clear, actionable plans.
 - **Model**: solar-pro3
-- **Output**: `plan.md` → `.oms/plans/`
-- **Usage**: `oms plan "목표"`
+- **Output**: `plan.md` → `.solar-code/plans/`
+- **Usage**: `solar plan "목표"`
 
 ### architect
 System design, repo architecture, API boundaries.
 - **Model**: solar-pro3
 - **Output**: `architecture.md`
-- **Usage**: `oms plan "시스템 설계"` or via `oms team`
+- **Usage**: `solar plan "시스템 설계"` or via `solar team`
 
 ### executor
 Implements code using the Claw backend.
 - **Model**: solar-pro3
 - **Output**: Working code in worktree
-- **Usage**: `oms code "구현 목표"` or via `oms team`
+- **Usage**: `solar code "구현 목표"` or via `solar team`
 
 ### reviewer
 Code review, security review, regression checks.
 - **Model**: solar-pro3
-- **Output**: `review.md` → `.oms/logs/reviews/`
-- **Usage**: `oms review`
+- **Output**: `review.md` → `.solar-code/logs/reviews/`
+- **Usage**: `solar review`
 
 ### researcher
 Web/repo/doc research.
 - **Model**: solar-pro3
 - **Output**: `research.md` with sources
-- **Usage**: `oms chat "Research: 주제"` or via `oms team`
+- **Usage**: `solar chat "Research: 주제"` or via `solar team`
 
 ### document-analyst
 Upstage Document Parse + Korean document summarization.
 - **Model**: solar-pro3
-- **Output**: structured JSON + summary → `.oms/parsed/`
-- **Usage**: `oms parse ./file.pdf`
+- **Output**: structured JSON + summary → `.solar-code/parsed/`
+- **Usage**: `solar parse ./file.pdf`
 
 ### korean-localizer
 Korean-first UX, tone, docs, business/government document style.
 - **Model**: solar-pro3
 - **Output**: Localized Korean content
-- **Usage**: Via `oms chat` or as a team worker
+- **Usage**: Via `solar chat` or as a team worker
 
 ## Custom Agents
 
-Add custom agent profiles to `.oms/agents/<name>/`:
+Add custom agent profiles to `.solar-code/agents/<name>/`:
 
 ```
-.oms/agents/my-agent/
+.solar-code/agents/my-agent/
   manifest.json
   prompt.md
 ```
@@ -68,5 +68,5 @@ Add custom agent profiles to `.oms/agents/<name>/`:
 }
 ```
 
-List agents: `oms agents`
-Show details: `oms agents show <name>`
+List agents: `solar agents`
+Show details: `solar agents show <name>`

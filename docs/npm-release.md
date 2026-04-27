@@ -4,7 +4,7 @@
 
 | Package | Purpose | Published |
 |---------|---------|-----------|
-| `solar-code` | Main CLI (`oms` command) | Yes |
+| `solar-code` | Main CLI (`solar` command) | Yes |
 | `@solar-code/core` | Provider, backend, state | Yes |
 | `@solar-code/agents` | Agent definitions | Yes |
 | `@solar-code/skills` | Skill registry | Yes |

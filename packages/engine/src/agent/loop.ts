@@ -12,14 +12,19 @@ import {
 import { validateBashCommand } from '../tools/bash-policy.js';
 import type { AgentMessage, AgentSessionState } from './messages.js';
 import {
+  clearInputTail,
   createAssistantTextRenderer,
+  eraseInputSuffix,
   finishAssistantLine,
   finishInputPrompt,
+  moveInputCursorLeft,
+  moveInputCursorRight,
   printAssistantPrefix,
   printHistory,
   printInputPlaceholder,
   printNotice,
   printProgressStep,
+  renderInputAppend,
   renderInputBuffer,
   printSessionBanner,
   printSlashHelp,
@@ -928,34 +933,49 @@ function readPromptLine(history: string[] = [], promptStatus?: PromptStatusOptio
       }
       if (key.name === 'left') {
         if (cursor > 0) {
+          const char = buffer[cursor - 1] ?? '';
           cursor--;
-          draw();
+          if (rendered) moveInputCursorLeft(char);
+          else draw();
         }
         return;
       }
       if (key.name === 'right') {
         if (cursor < buffer.length) {
+          const char = buffer[cursor] ?? '';
           cursor++;
-          draw();
+          if (rendered) moveInputCursorRight(char);
+          else draw();
         }
         return;
       }
       if (key.name === 'home' || (key.ctrl && key.name === 'a')) {
-        cursor = 0;
-        draw();
+        if (cursor > 0) {
+          const prefix = buffer.slice(0, cursor).join('');
+          cursor = 0;
+          if (rendered) moveInputCursorLeft(prefix);
+          else draw();
+        }
         return;
       }
       if (key.name === 'end' || (key.ctrl && key.name === 'e')) {
-        cursor = buffer.length;
-        draw();
+        if (cursor < buffer.length) {
+          const suffix = buffer.slice(cursor).join('');
+          cursor = buffer.length;
+          if (rendered) moveInputCursorRight(suffix);
+          else draw();
+        }
         return;
       }
       if (key.name === 'backspace') {
         if (cursor > 0) {
+          const deleted = buffer[cursor - 1] ?? '';
+          const removingAtEnd = cursor === buffer.length;
           buffer.splice(cursor - 1, 1);
           cursor--;
           resetHistoryCursor();
-          draw();
+          if (rendered && removingAtEnd) eraseInputSuffix(deleted);
+          else draw();
         }
         return;
       }
@@ -980,16 +1000,19 @@ function readPromptLine(history: string[] = [], promptStatus?: PromptStatusOptio
         if (cursor < buffer.length) {
           buffer.splice(cursor);
           resetHistoryCursor();
-          draw();
+          if (rendered) clearInputTail();
+          else draw();
         }
         return;
       }
       if (str && !key.ctrl && !key.meta && str >= ' ') {
         const chars = Array.from(str);
+        const appending = cursor === buffer.length;
         buffer.splice(cursor, 0, ...chars);
         cursor += chars.length;
         resetHistoryCursor();
-        draw();
+        if (appending && rendered) renderInputAppend(str);
+        else draw();
         return;
       }
     };

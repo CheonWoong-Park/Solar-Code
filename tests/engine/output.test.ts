@@ -1,8 +1,13 @@
 import { afterEach, describe, expect, it, vi } from 'vitest';
 import {
+  clearInputTail,
   createAssistantTextRenderer,
+  eraseInputSuffix,
   finishInputPrompt,
+  moveInputCursorLeft,
+  moveInputCursorRight,
   printInputPlaceholder,
+  renderInputAppend,
   renderInputBuffer,
 } from '../../packages/engine/src/agent/output.js';
 
@@ -51,21 +56,53 @@ describe('agent output rendering', () => {
     expect(output).toBe('* item');
   });
 
-  it('places the cursor relative to the full input card width', () => {
-    const descriptor = Object.getOwnPropertyDescriptor(process.stdout, 'columns');
+  it('places the cursor relative to the rendered input text', () => {
+    const columnsDescriptor = Object.getOwnPropertyDescriptor(process.stdout, 'columns');
+    const ttyDescriptor = Object.getOwnPropertyDescriptor(process.stdout, 'isTTY');
     Object.defineProperty(process.stdout, 'columns', { configurable: true, value: 80 });
+    Object.defineProperty(process.stdout, 'isTTY', { configurable: true, value: true });
     let output = '';
     try {
       output = captureStdout(() => {
         renderInputBuffer('abcd', 2);
       });
     } finally {
-      if (descriptor) Object.defineProperty(process.stdout, 'columns', descriptor);
+      if (columnsDescriptor) Object.defineProperty(process.stdout, 'columns', columnsDescriptor);
       else Reflect.deleteProperty(process.stdout, 'columns');
+      if (ttyDescriptor) Object.defineProperty(process.stdout, 'isTTY', ttyDescriptor);
+      else Reflect.deleteProperty(process.stdout, 'isTTY');
     }
 
     expect(output).toContain('› abcd');
     expect(output.endsWith('\x1b[76D')).toBe(true);
+  });
+
+  it('appends plain input on the grey input bar without redrawing the whole card', () => {
+    const ttyDescriptor = Object.getOwnPropertyDescriptor(process.stdout, 'isTTY');
+    Object.defineProperty(process.stdout, 'isTTY', { configurable: true, value: true });
+    let output = '';
+    try {
+      output = captureStdout(() => {
+        renderInputAppend('abc');
+      });
+    } finally {
+      if (ttyDescriptor) Object.defineProperty(process.stdout, 'isTTY', ttyDescriptor);
+      else Reflect.deleteProperty(process.stdout, 'isTTY');
+    }
+
+    expect(stripAnsi(output)).toBe('abc');
+    expect(output).not.toContain('\x1b[2K');
+  });
+
+  it('moves and erases input using display columns', () => {
+    const output = captureStdout(() => {
+      moveInputCursorLeft('한a');
+      moveInputCursorRight('ab');
+      eraseInputSuffix('나');
+      clearInputTail();
+    });
+
+    expect(output).toBe('\x1b[3D\x1b[2C\x1b[2D  \x1b[2D\x1b[K');
   });
 
   it('renders the input placeholder as a three-line card', () => {

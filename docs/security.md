@@ -9,26 +9,26 @@
 
 ## Hooks Security
 
-`.oms/hooks.json` can define shell commands that execute during sessions.
+`.solar-code/hooks.json` can define shell commands that execute during sessions.
 
 **Default**: hooks are **disabled** (`"enabled": false`).
 
 Before enabling hooks:
-1. Review all commands in `.oms/hooks.json`
+1. Review all commands in `.solar-code/hooks.json`
 2. Ensure you trust the source of the hooks
 3. Set `"enabled": true` only after review
 
 ```
 SECURITY WARNING: OMS hooks execute shell commands.
 Only enable hooks from sources you trust.
-Review .oms/hooks.json before enabling.
+Review .solar-code/hooks.json before enabling.
 ```
 
 Hook commands receive context via environment variables (e.g., `OMS_COMMAND`), never via shell interpolation of user input.
 
 ## Path Traversal Prevention
 
-MCP server operations validate that paths stay within `.oms/` — no `../` escapes allowed.
+MCP server operations validate that paths stay within `.solar-code/` — no `../` escapes allowed.
 
 ## Team Mode
 
@@ -40,10 +40,10 @@ Git worktrees are created per-worker, providing isolation. Each worker operates 
 
 ## Secrets in Code
 
-Never commit `.oms/` to git — it may contain session logs and parsed documents. Add `.oms/` to `.gitignore`:
+Never commit `.solar-code/` to git — it may contain session logs and parsed documents. Add `.solar-code/` to `.gitignore`:
 
 ```
-echo '.oms/' >> .gitignore
+echo '.solar-code/' >> .gitignore
 ```
 
 ## Reporting Security Issues

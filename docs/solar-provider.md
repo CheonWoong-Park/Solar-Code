@@ -43,7 +43,7 @@ This means all existing Claw features work with Solar transparently.
 
 ## Streaming
 
-Streaming is supported via Server-Sent Events (SSE). All `oms` commands stream by default.
+Streaming is supported via Server-Sent Events (SSE). All `solar` commands stream by default.
 
 ## Tool Calling
 

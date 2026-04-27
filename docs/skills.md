@@ -6,25 +6,25 @@ Skills are reusable prompt workflows that can be invoked by trigger name.
 
 | Trigger | Command | Description |
 |---------|---------|-------------|
-| `$plan` | `oms plan <goal>` | Full planning workflow |
-| `$deep-interview` | `oms chat "$deep-interview <topic>"` | Requirements gathering |
-| `$review` | `oms review` | Code review via Solar |
-| `$tdd` | `oms tdd <feature>` | Test-driven implementation |
-| `$parse` | `oms parse <file>` | Document parsing |
-| `$summarize-doc` | `oms parse <file> --ask "요약"` | Document summarization |
-| `$contract-review` | `oms parse <file> --ask "계약 검토"` | Contract risk analysis |
-| `$repo-map` | `oms chat "$repo-map"` | Repository map |
-| `$team` | `oms team <n> <goal>` | Multi-agent team |
-| `$research` | `oms chat "$research <topic>"` | Deep research |
-| `$ship` | `oms chat "$ship"` | Pre-release checklist |
-| `$doctor` | `oms doctor` | Environment check |
+| `$plan` | `solar plan <goal>` | Full planning workflow |
+| `$deep-interview` | `solar chat "$deep-interview <topic>"` | Requirements gathering |
+| `$review` | `solar review` | Code review via Solar |
+| `$tdd` | `solar tdd <feature>` | Test-driven implementation |
+| `$parse` | `solar parse <file>` | Document parsing |
+| `$summarize-doc` | `solar parse <file> --ask "요약"` | Document summarization |
+| `$contract-review` | `solar parse <file> --ask "계약 검토"` | Contract risk analysis |
+| `$repo-map` | `solar chat "$repo-map"` | Repository map |
+| `$team` | `solar team <n> <goal>` | Multi-agent team |
+| `$research` | `solar chat "$research <topic>"` | Deep research |
+| `$ship` | `solar chat "$ship"` | Pre-release checklist |
+| `$doctor` | `solar doctor` | Environment check |
 
 ## Custom Skills
 
-Add skills to `.oms/skills/<name>/`:
+Add skills to `.solar-code/skills/<name>/`:
 
 ```
-.oms/skills/my-skill/
+.solar-code/skills/my-skill/
   manifest.json
   prompt.md
 ```
@@ -40,6 +40,6 @@ Add skills to `.oms/skills/<name>/`:
 }
 ```
 
-Install a skill: `oms skills install <path>`
-List skills: `oms skills`
-Show skill: `oms skills show <name>`
+Install a skill: `solar skills install <path>`
+List skills: `solar skills`
+Show skill: `solar skills show <name>`

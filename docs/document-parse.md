@@ -6,15 +6,15 @@ Solar Code integrates Upstage Document Parse as a first-class capability.
 
 ```bash
 # Parse PDF to markdown
-oms parse ./report.pdf
+solar parse ./report.pdf
 
 # Specify output format
-oms parse ./report.pdf --format markdown
-oms parse ./form.pdf --format html
+solar parse ./report.pdf --format markdown
+solar parse ./form.pdf --format html
 
 # Ask Solar a question about the parsed content
-oms parse ./report.pdf --ask "핵심 내용을 요약해줘"
-oms parse ./contract.pdf --ask "주요 리스크를 나열해줘"
+solar parse ./report.pdf --ask "핵심 내용을 요약해줘"
+solar parse ./contract.pdf --ask "주요 리스크를 나열해줘"
 ```
 
 ## Supported File Types
@@ -25,7 +25,7 @@ oms parse ./contract.pdf --ask "주요 리스크를 나열해줘"
 
 ## Output
 
-Parsed content is saved to `.oms/parsed/<filename>.md`.
+Parsed content is saved to `.solar-code/parsed/<filename>.md`.
 
 For large documents, the CLI shows the first 3000 characters and saves the full content to file.
 
@@ -37,7 +37,7 @@ import { parseDocument } from '@solar-code/core';
 const result = await parseDocument({
   filePath: './report.pdf',
   outputFormat: 'markdown',
-  omsDir: '.oms',
+  omsDir: '.solar-code',
   apiKey: process.env.UPSTAGE_API_KEY,
 });
 
@@ -47,7 +47,7 @@ console.log(result.savedPath);
 
 ## Configuration
 
-In `.oms/config.json`:
+In `.solar-code/config.json`:
 
 ```json
 {
@@ -67,5 +67,5 @@ Solar natively understands Korean, making it ideal for:
 - 보고서 (Reports)
 
 ```bash
-oms parse ./계약서.pdf --ask "갑을 관계와 주요 의무 사항을 정리해줘"
+solar parse ./계약서.pdf --ask "갑을 관계와 주요 의무 사항을 정리해줘"
 ```
