@@ -4,7 +4,7 @@
 
 <img src="exemple.png" alt="Solar Code terminal screenshot" width="900" />
 
-**A Solar-native terminal coding agent for local repositories**
+**A Solar-native terminal coding agent**
 
 Solar Code is an interactive coding agent shell powered by Upstage Solar.  
 It can inspect your repository, plan code changes, edit files, run commands, and preserve project-local session history.
