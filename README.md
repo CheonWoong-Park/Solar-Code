@@ -200,40 +200,6 @@ The `oms` command is also available as an optional compatibility alias.
 
 ---
 
-## Workspace Boundaries
-
-Solar Code tools are scoped to the directory where `solar` was launched.
-
-For example, if Solar Code starts from:
-
-```text
-/mnt/d/DEV/OhMySolar
-```
-
-The following paths are allowed:
-
-```text
-test/tetris.html
-/mnt/d/DEV/OhMySolar/test/tetris.html
-```
-
-But this path is blocked:
-
-```text
-/mnt/d/DEV/test/tetris.html
-```
-
-To work in another project, start Solar Code from that directory:
-
-```bash
-cd /mnt/d/DEV/test
-solar
-```
-
-This keeps file reads, writes, edits, and shell command execution constrained to the active workspace.
-
----
-
 ## Native Engine
 
 Solar Code uses a TypeScript-based Solar function-calling engine with local coding tools.
